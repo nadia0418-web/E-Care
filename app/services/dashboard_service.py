@@ -4,7 +4,8 @@
 그때그때 다시 계산한다. 하드코딩된 값은 없다.
 """
 
-from datetime import date
+from collections import Counter
+from datetime import date, timedelta
 
 from app.services import (
     employee_service,
@@ -16,6 +17,49 @@ from app.services import (
 
 # 우선 처리 필요 영역 정렬 순서 (요청 순서 그대로)
 PRIORITY_ORDER = ["긴급 문의", "HR 회신 대기", "HR 확인 요청", "추가 서류 요청", "신규 문의"]
+
+CARE_ACTIVITY_DAYS = 7
+
+# 요일 표기 (X축 라벨용)
+_WEEKDAY_KO = ["월", "화", "수", "목", "금", "토", "일"]
+
+
+def _get_care_activity(inquiries, days=CARE_ACTIVITY_DAYS):
+    """최근 N일간의 Care 활동량(신규 문의 접수 + GHD 처리 활동)을 날짜별로 집계한다.
+    새 DB 테이블 없이 기존 문의 데이터(inquiry_date)와 워크플로우 처리 기록
+    (Step 완료/이메일 발송/HR 회신/처리 결과)만으로 계산한다."""
+    today = date.today()
+    day_list = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
+    counts = {d.isoformat(): 0 for d in day_list}
+
+    for inq in inquiries:
+        if inq["inquiry_date"] in counts:
+            counts[inq["inquiry_date"]] += 1
+
+    activity_counts = workflow_service.get_recent_activity_counts(days=days, today=today)
+    for day_str, n in activity_counts.items():
+        if day_str in counts:
+            counts[day_str] += n
+
+    series = [
+        {
+            "date": d.isoformat(),
+            "label": f"{d.month}/{d.day}",
+            "weekday": _WEEKDAY_KO[d.weekday()],
+            "count": counts[d.isoformat()],
+        }
+        for d in day_list
+    ]
+    return {"series": series, "total": sum(counts.values())}
+
+
+def _get_care_by_category(inquiries):
+    """문의의 기존 category 값을 그대로 사용해 카테고리별 건수를 집계한다
+    (새로운 카테고리 체계를 만들지 않고 기존 data/inquiries.xlsx의 category를 그대로 사용)."""
+    counter = Counter(inq["category"] for inq in inquiries)
+    ranked = counter.most_common()
+    series = [{"category": category, "count": count} for category, count in ranked]
+    return {"series": series, "total": sum(counter.values())}
 
 
 def _summarize_inquiry(inquiry, state):
@@ -97,4 +141,6 @@ def get_dashboard_data(priority_limit=15, recent_limit=15):
         "priority_total": len(priority_items),
         "recent_items": recent_items[:recent_limit],
         "proactive_items": proactive_items,
+        "care_activity": _get_care_activity(inquiries),
+        "care_by_category": _get_care_by_category(inquiries),
     }

@@ -115,6 +115,32 @@
     {% endif %}
 </div>
 
+<!-- Care Activity / Care by Category -->
+<div class="admin-card-grid" style="margin-bottom: 22px;">
+    <div class="admin-card" style="margin-bottom: 0;">
+        <h3>Care Activity</h3>
+        <p class="hint-text">최근 7일간의 Care 업무 발생 추이 (문의 접수 + GHD 처리 활동)</p>
+        {% if care_activity.total > 0 %}
+        <div class="chart-box">
+            <canvas id="careActivityChart"></canvas>
+        </div>
+        {% else %}
+        <p class="empty-text">최근 7일간 기록된 Care 활동이 없습니다.</p>
+        {% endif %}
+    </div>
+    <div class="admin-card" style="margin-bottom: 0;">
+        <h3>Care by Category</h3>
+        <p class="hint-text">카테고리별 Care 문의 건수</p>
+        {% if care_by_category.total > 0 %}
+        <div class="chart-box">
+            <canvas id="careCategoryChart"></canvas>
+        </div>
+        {% else %}
+        <p class="empty-text">표시할 카테고리 데이터가 없습니다.</p>
+        {% endif %}
+    </div>
+</div>
+
 <!-- 최근 문의 -->
 <div class="admin-card">
     <h3>최근 문의</h3>
@@ -147,4 +173,115 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block scripts %}
+{% if care_activity.total > 0 or care_by_category.total > 0 %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function () {
+    var careActivity = {{ care_activity.series | tojson }};
+    var careByCategory = {{ care_by_category.series | tojson }};
+    var brandOrange = "#FF6A00";
+
+    function showChartError(canvasId) {
+        var canvas = document.getElementById(canvasId);
+        var box = canvas && canvas.closest(".chart-box");
+        if (box) {
+            box.innerHTML = '<p class="empty-text">차트를 불러올 수 없습니다.</p>';
+        }
+    }
+
+    try {
+        if (typeof Chart === "undefined") {
+            throw new Error("Chart.js failed to load");
+        }
+
+        var activityCanvas = document.getElementById("careActivityChart");
+        if (activityCanvas) {
+            new Chart(activityCanvas, {
+                type: "line",
+                data: {
+                    labels: careActivity.map(function (d) { return d.label; }),
+                    datasets: [{
+                        data: careActivity.map(function (d) { return d.count; }),
+                        borderColor: brandOrange,
+                        backgroundColor: "rgba(255, 106, 0, 0.12)",
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: brandOrange,
+                        tension: 0.3,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 200 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            displayColors: false,
+                            callbacks: {
+                                title: function (items) {
+                                    var d = careActivity[items[0].dataIndex];
+                                    return d.label + " (" + d.weekday + ")";
+                                },
+                                label: function (item) {
+                                    return "Care " + item.parsed.y + "건";
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#eee" } }
+                    }
+                }
+            });
+        }
+
+        var categoryCanvas = document.getElementById("careCategoryChart");
+        if (categoryCanvas) {
+            new Chart(categoryCanvas, {
+                type: "bar",
+                data: {
+                    labels: careByCategory.map(function (d) { return d.category; }),
+                    datasets: [{
+                        data: careByCategory.map(function (d) { return d.count; }),
+                        backgroundColor: brandOrange,
+                        borderRadius: 4,
+                        maxBarThickness: 24,
+                    }]
+                },
+                options: {
+                    indexAxis: "y",
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 200 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            displayColors: false,
+                            callbacks: {
+                                label: function (item) {
+                                    return item.label + " · " + item.parsed.x + "건";
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: "#eee" } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+    } catch (e) {
+        showChartError("careActivityChart");
+        showChartError("careCategoryChart");
+    }
+})();
+</script>
+{% endif %}
 {% endblock %}

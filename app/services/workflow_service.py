@@ -16,7 +16,7 @@ hr_communications / hr_replies / processing_results 4개 테이블에 저장하�
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from app.services import supabase_client
@@ -396,6 +396,63 @@ def save_resolution(inquiry_id, outcome, memo):
     data[inquiry_id] = state
     _save_json(data)
     return state
+
+
+def get_recent_activity_counts(days=7, today=None):
+    """최근 N일간 GHD 담당자가 실제로 수행한 처리 활동(Step 완료 / HR 이메일 발송 /
+    HR 회신 등록 / 처리 결과 등록) 건수를 날짜별로 집계한다 (홈 화면 Care Activity 차트용).
+
+    Supabase가 설정되어 있으면 각 테이블의 타임스탬프 컬럼을 기준으로 집계하고,
+    로컬 JSON 모드에서는 completed_steps에 시각이 저장되지 않으므로 이메일/HR 회신/
+    처리 결과 3가지만 집계한다."""
+    today = today or date.today()
+    day_list = [today - timedelta(days=i) for i in range(days - 1, -1, -1)]
+    counts = {d.isoformat(): 0 for d in day_list}
+    start = day_list[0].isoformat()
+
+    def _bump(ts):
+        if not ts:
+            return
+        day = str(ts)[:10]
+        if day in counts:
+            counts[day] += 1
+
+    client = supabase_client.get_client()
+    if client:
+        steps_res = (
+            client.table("action_steps")
+            .select("updated_at")
+            .eq("completed", True)
+            .gte("updated_at", start)
+            .execute()
+        )
+        for r in steps_res.data:
+            _bump(r["updated_at"])
+
+        email_res = client.table("hr_communications").select("sent_at").gte("sent_at", start).execute()
+        for r in email_res.data:
+            _bump(r["sent_at"])
+
+        reply_res = client.table("hr_replies").select("registered_at").gte("registered_at", start).execute()
+        for r in reply_res.data:
+            _bump(r["registered_at"])
+
+        result_res = client.table("processing_results").select("recorded_at").gte("recorded_at", start).execute()
+        for r in result_res.data:
+            _bump(r["recorded_at"])
+    else:
+        data = _load_json()
+        for state in data.values():
+            for entry in state.get("email_log", []):
+                _bump(entry.get("sent_at"))
+            hr_reply = state.get("hr_reply")
+            if hr_reply:
+                _bump(hr_reply.get("registered_at"))
+            resolution = state.get("resolution")
+            if resolution:
+                _bump(resolution.get("recorded_at"))
+
+    return {d.isoformat(): counts[d.isoformat()] for d in day_list}
 
 
 def get_workflow_status(inquiry_id, structured, state=None):

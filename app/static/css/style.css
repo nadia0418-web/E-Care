@@ -861,6 +861,12 @@ p {
     overflow-x: auto;
 }
 
+/* ---- Care Activity / Care by Category 차트 ---- */
+.chart-box {
+    position: relative;
+    height: 220px;
+}
+
 /* ---- 직원 데이터 입력 폼 ---- */
 .form-grid {
     display: grid;
