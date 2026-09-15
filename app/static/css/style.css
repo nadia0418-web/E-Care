@@ -1,0 +1,464 @@
+body {
+    font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    background-color: #f5f6f8;
+    margin: 0;
+    color: #222;
+}
+
+.home-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+    background: #ffffff;
+    padding: 48px 64px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+h1 {
+    color: #2b6cb0;
+    margin-bottom: 8px;
+}
+
+p {
+    color: #555;
+    margin: 0;
+}
+
+/* ---- 공통 레이아웃 (목록/상세 페이지) ---- */
+.page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+}
+
+.page a {
+    color: #2b6cb0;
+}
+
+.page-header h2 {
+    margin-bottom: 4px;
+}
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 16px;
+    font-size: 14px;
+}
+
+.disclaimer {
+    background: #fff4e5;
+    border: 1px solid #f0c36d;
+    color: #7a5b00;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin: 12px 0 20px;
+}
+
+/* ---- 문의 목록 테이블 ---- */
+.inquiry-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.inquiry-table th,
+.inquiry-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    font-size: 13px;
+    text-align: left;
+}
+
+.inquiry-table th {
+    background: #4472c4;
+    color: #fff;
+}
+
+.inquiry-table tr:hover {
+    background: #f5f8ff;
+}
+
+/* ---- 배지 ---- */
+.badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-HIGH, .badge-HR_FLAG { background: #f8cbad; color: #7a2e00; }
+.badge-MEDIUM, .badge-SITUATION_CHECK { background: #ffe699; color: #7a5b00; }
+.badge-LOW, .badge-GHD_DIRECT { background: #c6e0b4; color: #275c1f; }
+
+/* ---- 상세 페이지 섹션 카드 ---- */
+.section-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.section-card h3 {
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #2b6cb0;
+    font-size: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.field-row {
+    display: flex;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 14px;
+    border-bottom: 1px dashed #f0f0f0;
+}
+
+.field-row:last-child {
+    border-bottom: none;
+}
+
+.field-label {
+    flex: 0 0 140px;
+    color: #777;
+    font-weight: 600;
+}
+
+.field-value {
+    flex: 1;
+}
+
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag {
+    background: #eef2ff;
+    color: #33409a;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+}
+
+/* ---- Action 체크박스 폼 ---- */
+.action-form label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    font-size: 14px;
+}
+
+.action-form input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-primary {
+    margin-top: 12px;
+    background: #2b6cb0;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #235a92;
+}
+
+.btn-primary:disabled {
+    background: #b9c4cf;
+    cursor: not-allowed;
+}
+
+.confirmed-box {
+    background: #eafaf0;
+    border: 1px solid #8fd19e;
+    color: #1c6b3a;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-top: 14px;
+}
+
+.error-box {
+    background: #fdecea;
+    border: 1px solid #f3a6a6;
+    color: #9b2226;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 14px;
+}
+
+/* ---- HR 이메일 작성 폼 ---- */
+.text-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border: 1px solid #d5d9de;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: inherit;
+}
+
+.text-area {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #d5d9de;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.double-check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.double-check-list label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+/* ---- 추천 Action 단계(step) 표시 ---- */
+.action-steps {
+    list-style: none;
+    margin: 0 0 18px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.action-steps li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #f7f9ff;
+    border: 1px solid #dbe4ff;
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+
+.step-badge {
+    flex: 0 0 auto;
+    background: #2b6cb0;
+    color: #fff;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.step-body {
+    flex: 1;
+}
+
+.step-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #222;
+}
+
+.step-guidance {
+    font-size: 13px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.sub-heading {
+    margin: 4px 0 4px;
+    font-size: 14px;
+    color: #444;
+}
+
+.hint-text {
+    font-size: 12px;
+    color: #888;
+    margin: 0 0 10px;
+}
+
+/* ---- 관련 규정 / 유사 사례 카드 목록 ---- */
+.card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.mini-card {
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: #fafbfc;
+}
+
+.mini-card-primary {
+    border-color: #9dbdea;
+    background: #f2f7ff;
+}
+
+.mini-card-header {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mini-card-id {
+    color: #2b6cb0;
+}
+
+.tag-primary {
+    background: #2b6cb0;
+    color: #fff;
+}
+
+.tag-matched {
+    background: #d7f2df;
+    color: #1c6b3a;
+    font-weight: 600;
+}
+
+.empty-text {
+    color: #888;
+    font-size: 13px;
+    font-style: italic;
+    padding: 8px 0;
+}
+
+.flag-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+}
+
+.badge-lg {
+    font-size: 14px;
+    padding: 4px 12px;
+}
+
+/* ---- Timeline ---- */
+.timeline-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.timeline-list li {
+    position: relative;
+    padding: 8px 0 8px 20px;
+    border-left: 2px solid #cdd7e1;
+    font-size: 13px;
+}
+
+.timeline-list li::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 14px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #2b6cb0;
+}
+
+.timeline-list li.timeline-fail::before {
+    background: #b3261e;
+}
+
+.timeline-list li:last-child {
+    border-left: 2px solid transparent;
+}
+
+.timeline-label {
+    font-weight: 700;
+}
+
+.timeline-time {
+    color: #888;
+    font-size: 12px;
+}
+
+.timeline-detail {
+    color: #555;
+    margin-top: 2px;
+}
+
+/* ---- Dashboard KPI ---- */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+}
+
+.kpi-card {
+    background: #f7f9ff;
+    border: 1px solid #dbe4ff;
+    border-radius: 10px;
+    padding: 14px 10px;
+    text-align: center;
+}
+
+.kpi-card-urgent {
+    background: #fdecea;
+    border-color: #f3a6a6;
+}
+
+.kpi-card-done {
+    background: #eafaf0;
+    border-color: #8fd19e;
+}
+
+.kpi-number {
+    font-size: 26px;
+    font-weight: 700;
+    color: #2b6cb0;
+}
+
+.kpi-card-urgent .kpi-number {
+    color: #b3261e;
+}
+
+.kpi-card-done .kpi-number {
+    color: #1c6b3a;
+}
+
+.kpi-label {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}

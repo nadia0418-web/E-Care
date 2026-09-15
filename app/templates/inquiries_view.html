@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>문의 목록 - E-Care</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="page">
+        <div class="page-header">
+            <a class="back-link" href="{{ url_for('main.index') }}">← 홈으로</a>
+            <a class="back-link" href="{{ url_for('main.dashboard') }}" style="margin-left:12px;">업무 현황판 →</a>
+            <h2>문의 목록 (가상 데이터)</h2>
+            <p>총 {{ inquiries|length }}건. 각 문의를 클릭하면 1차 분석 및 구조화 결과를 볼 수 있습니다.</p>
+        </div>
+        <table class="inquiry-table">
+            <thead>
+                <tr>
+                    <th>문의ID</th>
+                    <th>문의일자</th>
+                    <th>사번</th>
+                    <th>카테고리</th>
+                    <th>문의내용</th>
+                    <th>Flag</th>
+                    <th>긴급도</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inq in inquiries %}
+                <tr>
+                    <td><a href="{{ url_for('main.inquiry_detail_view', inquiry_id=inq.inquiry_id) }}">{{ inq.inquiry_id }}</a></td>
+                    <td>{{ inq.inquiry_date }}</td>
+                    <td>{{ inq.employee_id }}</td>
+                    <td>{{ inq.category }}</td>
+                    <td>{{ inq.inquiry_text }}</td>
+                    <td><span class="badge badge-{{ inq.flag }}">{{ inq.flag }}</span></td>
+                    <td><span class="badge badge-{{ inq.urgency }}">{{ inq.urgency }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

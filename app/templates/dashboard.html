@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>GHD 업무 현황판 - E-Care</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="page">
+        <a class="back-link" href="{{ url_for('main.index') }}">← 홈으로</a>
+        <div class="page-header">
+            <h2>GHD 업무 현황판</h2>
+            <p>가상 데이터 기준 실시간 집계입니다. <a href="{{ url_for('main.inquiries_view') }}">전체 문의 목록 보기 →</a></p>
+        </div>
+
+        <!-- KPI -->
+        <div class="section-card">
+            <h3>오늘의 KPI</h3>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-number">{{ kpi.total }}</div>
+                    <div class="kpi-label">전체 문의</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-number">{{ kpi.unresolved }}</div>
+                    <div class="kpi-label">미처리 문의</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-number">{{ kpi.hr_confirm_waiting }}</div>
+                    <div class="kpi-label">HR 확인 대기</div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-number">{{ kpi.hr_reply_waiting }}</div>
+                    <div class="kpi-label">HR 회신 대기</div>
+                </div>
+                <div class="kpi-card kpi-card-urgent">
+                    <div class="kpi-number">{{ kpi.urgent }}</div>
+                    <div class="kpi-label">긴급 문의</div>
+                </div>
+                <div class="kpi-card kpi-card-done">
+                    <div class="kpi-number">{{ kpi.resolved_today }}</div>
+                    <div class="kpi-label">오늘 처리 완료</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 우선 처리 필요 -->
+        <div class="section-card">
+            <h3>우선 처리 필요 ({{ priority_total }}건 중 상위 {{ priority_items|length }}건)</h3>
+            <p class="hint-text">긴급 문의 → HR 회신 대기 → HR 확인 요청 → 추가 서류 요청 → 신규 문의 순으로 정렬되어 있습니다.</p>
+            {% if priority_items %}
+            <table class="inquiry-table">
+                <thead>
+                    <tr>
+                        <th>문의ID</th>
+                        <th>임직원</th>
+                        <th>문의 유형</th>
+                        <th>핵심 문의</th>
+                        <th>Flag</th>
+                        <th>긴급도</th>
+                        <th>현재 상태</th>
+                        <th>Next Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in priority_items %}
+                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;">
+                        <td><a href="{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}">{{ item.inquiry_id }}</a></td>
+                        <td>{{ item.employee_name }}</td>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.key_issue }}</td>
+                        <td><span class="badge badge-{{ item.flag_type }}">{{ item.flag_type }}</span></td>
+                        <td><span class="badge badge-{{ item.urgency }}">{{ item.urgency }}</span></td>
+                        <td><span class="badge badge-{{ status_badge_class.get(item.status, '') }}">{{ item.status }}</span></td>
+                        <td>{{ item.next_action }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="empty-text">지금 우선 처리가 필요한 문의가 없습니다.</p>
+            {% endif %}
+        </div>
+
+        <!-- 최근 문의 -->
+        <div class="section-card">
+            <h3>최근 문의</h3>
+            <table class="inquiry-table">
+                <thead>
+                    <tr>
+                        <th>접수일시</th>
+                        <th>임직원</th>
+                        <th>문의 유형</th>
+                        <th>핵심 문의</th>
+                        <th>Flag</th>
+                        <th>긴급도</th>
+                        <th>상태</th>
+                        <th>Next Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_items %}
+                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;">
+                        <td>{{ item.inquiry_date }}</td>
+                        <td>{{ item.employee_name }}</td>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.key_issue }}</td>
+                        <td><span class="badge badge-{{ item.flag_type }}">{{ item.flag_type }}</span></td>
+                        <td><span class="badge badge-{{ item.urgency }}">{{ item.urgency }}</span></td>
+                        <td><span class="badge badge-{{ status_badge_class.get(item.status, '') }}">{{ item.status }}</span></td>
+                        <td>{{ item.next_action }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

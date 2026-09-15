@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ project_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="home-page">
+        <div class="container">
+            <h1>{{ project_name }}</h1>
+            <p>외국인 임직원 문의 대응 업무지원 시스템</p>
+            <p style="margin-top:16px;"><a href="{{ url_for('main.dashboard') }}">GHD 업무 현황판 →</a></p>
+            <p style="margin-top:4px;"><a href="{{ url_for('main.inquiries_view') }}">문의 목록 보기 →</a></p>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
