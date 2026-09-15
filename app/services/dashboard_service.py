@@ -6,7 +6,13 @@
 
 from datetime import date
 
-from app.services import employee_service, inquiry_service, structuring_service, workflow_service
+from app.services import (
+    employee_service,
+    inquiry_service,
+    proactive_care_service,
+    structuring_service,
+    workflow_service,
+)
 
 # 우선 처리 필요 영역 정렬 순서 (요청 순서 그대로)
 PRIORITY_ORDER = ["긴급 문의", "HR 회신 대기", "HR 확인 요청", "추가 서류 요청", "신규 문의"]
@@ -82,9 +88,13 @@ def get_dashboard_data(priority_limit=15, recent_limit=15):
 
     recent_items = sorted(summaries, key=lambda s: s["inquiry_date"], reverse=True)
 
+    employees = employee_service.get_all_employees()
+    proactive_items = proactive_care_service.get_all_proactive_items(employees)
+
     return {
         "kpi": kpi,
         "priority_items": priority_items[:priority_limit],
         "priority_total": len(priority_items),
         "recent_items": recent_items[:recent_limit],
+        "proactive_items": proactive_items,
     }
