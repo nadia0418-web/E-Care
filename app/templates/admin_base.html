@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}E-Care{% endblock %}</title>
+    <title>{% block title %}E-CARE{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
 <body>
     <div class="admin-shell">
         <aside class="admin-sidebar">
-            <div class="admin-logo">E-Care<span class="admin-logo-dot"></span></div>
+            <div class="admin-logo">E-CARE<span class="admin-logo-dot"></span></div>
             <div class="admin-nav-section">메뉴</div>
             <a class="admin-nav-item {% if active_nav == 'home' %}active{% endif %}" href="{{ url_for('main.index') }}"><span class="admin-nav-icon">🏠</span>홈</a>
             <a class="admin-nav-item {% if active_nav == 'inquiries' %}active{% endif %}" href="{{ url_for('main.inquiries_view') }}"><span class="admin-nav-icon">📨</span>문의 목록</a>
@@ -21,7 +21,7 @@
 
         <div class="admin-main">
             <header class="admin-topbar">
-                <div class="admin-topbar-title">{% block topbar_title %}E-Care{% endblock %}</div>
+                <div class="admin-topbar-title">{% block topbar_title %}E-CARE{% endblock %}</div>
                 <div class="admin-topbar-right">
                     {% if current_user %}
                     <span class="admin-user-badge">

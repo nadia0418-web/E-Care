@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>관리자 로그인 - E-Care</title>
+    <title>관리자 로그인 - E-CARE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -11,7 +11,7 @@
 <body class="login-page">
     <div class="login-wrap">
         <div class="login-card">
-            <div class="login-logo">E-Care</div>
+            <div class="login-logo">E-CARE</div>
             <p class="login-sub">GHD 관리자 로그인</p>
             {% if error %}
             <div class="login-error">{{ error }}</div>
@@ -24,6 +24,7 @@
                 <input type="password" name="password" class="text-input" autocomplete="current-password">
                 <button type="submit" class="login-btn">로그인</button>
             </form>
+            <p class="login-hint">테스트 계정&nbsp; ID: admin / PW: (재설정한 비밀번호)</p>
         </div>
     </div>
 </body>
