@@ -33,8 +33,11 @@
                 </div>
             </div>
             <div class="field-row">
-                <div class="field-label">담당</div>
-                <div class="field-value">{{ rule.handler }} · HR 확인 필요: <strong>{{ "YES" if rule.hr_flag else "NO" }}</strong></div>
+                <div class="field-label">담당 · HR 확인</div>
+                <div class="field-value">
+                    <div class="check-line"><span class="check-mark is-checked">✓</span>{{ rule.handler }}</div>
+                    <div class="check-line"><span class="check-mark {% if rule.hr_flag %}is-checked{% endif %}">✓</span>HR 확인 필요</div>
+                </div>
             </div>
             <div class="field-row">
                 <div class="field-label">판단 근거</div>

@@ -118,7 +118,9 @@
                     </div>
                     <div class="field-row">
                         <div class="field-label">HR 확인 필요</div>
-                        <div class="field-value"><strong>{{ "YES" if rule.hr_flag else "NO" }}</strong></div>
+                        <div class="field-value">
+                            <span class="check-mark {% if rule.hr_flag %}is-checked{% endif %}">✓</span>
+                        </div>
                     </div>
                     <div class="field-row">
                         <div class="field-label">긴급도</div>

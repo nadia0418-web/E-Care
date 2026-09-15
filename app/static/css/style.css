@@ -357,6 +357,39 @@ p {
     font-weight: 600;
 }
 
+/* ---- 체크 표시 (YES/NO 텍스트 대신 사용) ---- */
+.check-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.check-line + .check-line {
+    margin-top: 2px;
+}
+
+.check-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 17px;
+    height: 17px;
+    border-radius: 5px;
+    border: 1.5px solid #d0d3d8;
+    background: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    color: transparent;
+}
+
+.check-mark.is-checked {
+    background: var(--brand-orange);
+    border-color: var(--brand-orange);
+    color: #fff;
+}
+
 .empty-text {
     color: #888;
     font-size: 13px;
