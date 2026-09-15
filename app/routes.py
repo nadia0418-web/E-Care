@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, url_fo
 
 from app.services import (
     analysis_service,
+    auth_service,
     dashboard_service,
     employee_service,
     inquiry_service,
@@ -24,6 +25,38 @@ DOUBLE_CHECK_ITEMS = [
 
 main_bp = Blueprint("main", __name__)
 
+# /login, /logout, 정적 파일을 제외한 모든 페이지는 로그인해야 접근 가능하다.
+_PUBLIC_ENDPOINTS = {"main.login_view", "main.logout_view", "static"}
+
+
+@main_bp.before_request
+def _require_login():
+    if request.endpoint in _PUBLIC_ENDPOINTS:
+        return None
+    if not auth_service.is_logged_in():
+        return redirect(url_for("main.login_view", next=request.path))
+    return None
+
+
+@main_bp.route("/login", methods=["GET", "POST"])
+def login_view():
+    next_url = request.values.get("next") or url_for("main.dashboard")
+    error = None
+    if request.method == "POST":
+        username = request.form.get("username", "")
+        password = request.form.get("password", "")
+        if auth_service.check_credentials(username, password):
+            auth_service.login(username)
+            return redirect(next_url)
+        error = "아이디 또는 비밀번호가 올바르지 않습니다."
+    return render_template("login.html", error=error, next_url=next_url)
+
+
+@main_bp.route("/logout")
+def logout_view():
+    auth_service.logout()
+    return redirect(url_for("main.login_view"))
+
 
 @main_bp.route("/")
 def index():
@@ -35,7 +68,12 @@ def dashboard():
     """GHD 업무 현황판: KPI + 우선 처리 필요 + 최근 문의. 모든 수치는 매 요청마다
     문의 데이터와 처리 상태에서 동적으로 계산한다 (하드코딩 없음)."""
     data = dashboard_service.get_dashboard_data()
-    return render_template("dashboard.html", status_badge_class=workflow_service.STATUS_BADGE_CLASS, **data)
+    return render_template(
+        "dashboard.html",
+        status_badge_class=workflow_service.STATUS_BADGE_CLASS,
+        current_user=auth_service.current_username(),
+        **data,
+    )
 
 
 @main_bp.route("/employees")

@@ -1,3 +1,12 @@
+:root {
+    /* ETNERS 브랜드 컬러 (관리자 로그인/대시보드 전용) */
+    --brand-orange: #FF6A00;
+    --brand-orange-dark: #E05F00;
+    --brand-charcoal: #23262B;
+    --brand-charcoal-soft: #34383F;
+    --brand-white: #FFFFFF;
+}
+
 body {
     font-family: "Segoe UI", "Malgun Gothic", sans-serif;
     background-color: #f5f6f8;
@@ -461,4 +470,265 @@ p {
     font-size: 12px;
     color: #666;
     margin-top: 4px;
+}
+
+/* ==================================================================
+   관리자 로그인 화면
+   ================================================================== */
+.login-page {
+    background: var(--brand-charcoal);
+    margin: 0;
+}
+
+.login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.login-card {
+    background: var(--brand-white);
+    width: 100%;
+    max-width: 360px;
+    padding: 40px 32px;
+    border-radius: 14px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    box-sizing: border-box;
+}
+
+.login-logo {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--brand-orange);
+    text-align: center;
+    letter-spacing: -0.5px;
+}
+
+.login-sub {
+    text-align: center;
+    color: #666;
+    font-size: 13px;
+    margin: 6px 0 22px;
+}
+
+.login-error {
+    background: #fdecea;
+    color: #9b2226;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 16px;
+}
+
+.login-label {
+    display: block;
+    font-size: 12px;
+    color: #555;
+    font-weight: 700;
+    margin: 14px 0 5px;
+}
+
+.login-btn {
+    width: 100%;
+    margin-top: 24px;
+    background: var(--brand-orange);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.login-btn:hover {
+    background: var(--brand-orange-dark);
+}
+
+/* ==================================================================
+   관리자 대시보드 (사이드바 레이아웃)
+   ================================================================== */
+.admin-shell {
+    display: flex;
+    min-height: 100vh;
+    background: #F3F4F6;
+}
+
+.admin-sidebar {
+    width: 224px;
+    flex: 0 0 224px;
+    background: var(--brand-charcoal);
+    color: #cfd2d6;
+    padding: 22px 0;
+    box-sizing: border-box;
+}
+
+.admin-logo {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--brand-orange);
+    padding: 0 22px 24px;
+    letter-spacing: -0.5px;
+}
+
+.admin-nav-section {
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    color: #7a7f87;
+    padding: 14px 22px 6px;
+}
+
+.admin-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 22px;
+    color: #cfd2d6;
+    text-decoration: none;
+    font-size: 14px;
+    border-left: 3px solid transparent;
+}
+
+.admin-nav-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+.admin-nav-item.active {
+    background: rgba(255, 106, 0, 0.14);
+    color: #fff;
+    font-weight: 600;
+    border-left-color: var(--brand-orange);
+}
+
+.admin-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 16px 30px;
+}
+
+.admin-topbar-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--brand-charcoal);
+}
+
+.admin-topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: #555;
+}
+
+.admin-user-badge {
+    background: var(--brand-charcoal);
+    color: #fff;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.admin-logout {
+    color: var(--brand-orange);
+    text-decoration: none;
+    font-weight: 700;
+}
+
+.admin-logout:hover {
+    text-decoration: underline;
+}
+
+.admin-content {
+    padding: 26px 30px 50px;
+}
+
+.admin-kpi-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.admin-kpi-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px 16px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    border-top: 3px solid var(--brand-orange);
+}
+
+.admin-kpi-card.is-urgent {
+    border-top-color: #d64545;
+}
+
+.admin-kpi-card.is-done {
+    border-top-color: #1c9e5a;
+}
+
+.admin-kpi-number {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--brand-charcoal);
+}
+
+.admin-kpi-card.is-urgent .admin-kpi-number {
+    color: #d64545;
+}
+
+.admin-kpi-card.is-done .admin-kpi-number {
+    color: #1c9e5a;
+}
+
+.admin-kpi-label {
+    font-size: 12px;
+    color: #777;
+    margin-top: 4px;
+}
+
+.admin-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px 22px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    margin-bottom: 22px;
+}
+
+.admin-card h3 {
+    margin: 0 0 14px;
+    color: var(--brand-charcoal);
+    font-size: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.admin-content .inquiry-table th {
+    background: var(--brand-charcoal);
+}
+
+@media (max-width: 760px) {
+    .admin-sidebar {
+        display: none;
+    }
+    .admin-content {
+        padding: 18px 16px 40px;
+    }
+    .admin-topbar {
+        padding: 14px 16px;
+    }
 }

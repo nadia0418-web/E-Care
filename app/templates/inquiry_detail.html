@@ -9,6 +9,7 @@
     <div class="page">
         <a class="back-link" href="{{ url_for('main.inquiries_view') }}">← 문의 목록으로</a>
         <a class="back-link" href="{{ url_for('main.dashboard') }}" style="margin-left:12px;">업무 현황판 →</a>
+        <a class="back-link" href="{{ url_for('main.logout_view') }}" style="margin-left:12px; color:#999;">로그아웃</a>
         <div class="page-header">
             <h2>문의 상세 · {{ inquiry.inquiry_id }}</h2>
         </div>

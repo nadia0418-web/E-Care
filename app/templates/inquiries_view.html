@@ -10,6 +10,7 @@
         <div class="page-header">
             <a class="back-link" href="{{ url_for('main.index') }}">← 홈으로</a>
             <a class="back-link" href="{{ url_for('main.dashboard') }}" style="margin-left:12px;">업무 현황판 →</a>
+            <a class="back-link" href="{{ url_for('main.logout_view') }}" style="margin-left:12px; color:#999;">로그아웃</a>
             <h2>문의 목록 (가상 데이터)</h2>
             <p>총 {{ inquiries|length }}건. 각 문의를 클릭하면 1차 분석 및 구조화 결과를 볼 수 있습니다.</p>
         </div>
