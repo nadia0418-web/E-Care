@@ -259,9 +259,11 @@ def inquiries_view():
     탭으로 묶어서 보여준다. ?tab= 쿼리로 홈 화면의 배너·KPI 카드에서 바로 원하는
     탭으로 진입할 수 있다."""
     data = inquiry_service.get_all_inquiries()
-    dashboard_data = dashboard_service.get_dashboard_data(priority_limit=200, recent_limit=50)
+    dashboard_data = dashboard_service.get_dashboard_data(
+        priority_limit=200, recent_limit=50, completed_limit=200
+    )
     active_tab = request.args.get("tab", "all")
-    if active_tab not in ("all", "proactive", "priority", "recent"):
+    if active_tab not in ("all", "proactive", "priority", "recent", "completed"):
         active_tab = "all"
     return render_template(
         "inquiries_view.html",
@@ -273,6 +275,8 @@ def inquiries_view():
         priority_items=dashboard_data["priority_items"],
         priority_total=dashboard_data["priority_total"],
         recent_items=dashboard_data["recent_items"],
+        completed_items=dashboard_data["completed_items"],
+        completed_total=dashboard_data["completed_total"],
     )
 
 

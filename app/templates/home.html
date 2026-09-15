@@ -37,7 +37,7 @@
         <div class="admin-kpi-number">{{ kpi.urgent }}</div>
         <div class="admin-kpi-label">긴급 문의</div>
     </a>
-    <a class="admin-kpi-card is-done" href="{{ url_for('main.inquiries_view', tab='recent') }}">
+    <a class="admin-kpi-card is-done" href="{{ url_for('main.inquiries_view', tab='completed') }}">
         <div class="admin-kpi-icon">✅</div>
         <div class="admin-kpi-number">{{ kpi.resolved_today }}</div>
         <div class="admin-kpi-label">오늘 처리 완료</div>

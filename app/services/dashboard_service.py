@@ -108,6 +108,7 @@ def _summarize_inquiry(inquiry, state):
         "next_action": next_action,
         "priority": priority,
         "resolved_today": resolved_today,
+        "resolution": state["resolution"],
     }
 
 
@@ -289,7 +290,7 @@ def _get_urgent_banners(priority_items, proactive_items, recent_items):
     return banners
 
 
-def get_dashboard_data(priority_limit=15, recent_limit=15):
+def get_dashboard_data(priority_limit=15, recent_limit=15, completed_limit=15):
     inquiries = inquiry_service.get_all_inquiries()
     # 문의 건수만큼 진행 상태를 반복 조회(N+1)하면 Supabase 호출이 폭증하므로,
     # 배치로 한 번에 가져와 각 문의에 매칭한다.
@@ -311,6 +312,11 @@ def get_dashboard_data(priority_limit=15, recent_limit=15):
 
     recent_items = sorted(summaries, key=lambda s: s["inquiry_date"], reverse=True)[:recent_limit]
 
+    completed_items = [s for s in summaries if s["status"] == "처리 완료"]
+    completed_items.sort(key=lambda s: (s["resolution"]["recorded_at"] if s["resolution"] else ""), reverse=True)
+    completed_total = len(completed_items)
+    completed_items = completed_items[:completed_limit]
+
     employees = employee_service.get_all_employees()
     employees_by_id = {e["employee_id"]: e for e in employees}
     proactive_items = proactive_care_service.get_all_proactive_items(employees)
@@ -327,6 +333,8 @@ def get_dashboard_data(priority_limit=15, recent_limit=15):
         "priority_items": priority_items[:priority_limit],
         "priority_total": len(priority_items),
         "recent_items": recent_items,
+        "completed_items": completed_items,
+        "completed_total": completed_total,
         "proactive_items": proactive_items,
         "care_activity": _get_care_activity(inquiries),
         "care_by_category": _get_care_by_category(inquiries),
