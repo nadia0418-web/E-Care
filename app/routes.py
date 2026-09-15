@@ -1,3 +1,5 @@
+import os
+
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 
 from app.services import (
@@ -56,7 +58,13 @@ def login_view():
             auth_service.login(username)
             return redirect(next_url)
         error = "아이디 또는 비밀번호가 올바르지 않습니다."
-    return render_template("login.html", error=error, next_url=next_url)
+    return render_template(
+        "login.html",
+        error=error,
+        next_url=next_url,
+        demo_username=os.environ.get("ADMIN_USERNAME"),
+        demo_password=os.environ.get("ADMIN_PASSWORD"),
+    )
 
 
 @main_bp.route("/logout")

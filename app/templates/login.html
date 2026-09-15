@@ -24,7 +24,9 @@
                 <input type="password" name="password" class="text-input" autocomplete="current-password">
                 <button type="submit" class="login-btn">로그인</button>
             </form>
-            <p class="login-hint">테스트 계정&nbsp; ID: admin / PW: (재설정한 비밀번호)</p>
+            {% if demo_username and demo_password %}
+            <p class="login-hint">테스트 계정&nbsp; ID: {{ demo_username }} / PW: {{ demo_password }}</p>
+            {% endif %}
         </div>
     </div>
 </body>
