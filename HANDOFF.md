@@ -27,7 +27,7 @@ Flask 기반 Demo/MVP 웹 애플리케이션입니다.
 | 배포 | Vercel (서버리스, `@vercel/python`) |
 | 버전관리 | GitHub — https://github.com/nadia0418-web/E-Care (private) |
 
-## 지금까지 완료한 단계 (STEP 1~14)
+## 지금까지 완료한 단계 (STEP 1~15)
 
 각 STEP은 이전 단계를 깨뜨리지 않고 누적 확장되었습니다.
 
@@ -45,6 +45,13 @@ Flask 기반 Demo/MVP 웹 애플리케이션입니다.
 - **STEP 12**: Supabase 연결 — 스키마(`supabase/schema.sql`), 듀얼 모드 서비스, 마이그레이션 스크립트(`scripts/migrate_to_supabase.py`), 실제 데이터 이전 완료 (직원 30/문의 120/규정 24건)
 - **STEP 13**: GitHub 저장소 생성 + Vercel 배포 (진행 중 — 아래 "현재 이슈" 참고)
 - **STEP 14**: 배포 후 최종 검증 (진행 중)
+- **STEP 15**: Proactive Care — 국적·비자유형·근무기간·소속(파견) 고객사 기준으로 문의가
+  들어오기 전에 GHD가 선제적으로 확인하면 좋은 항목을 Dashboard에 안내 (`proactive_care_service.py`,
+  `dashboard.html` "선제 확인 필요" 섹션). 국적별(`NATIONALITY_NOTES`, 13개국 중 6개국 커버)과
+  소속기업별(`CLIENT_POLICY_NOTES`, 9개 고객사 전체 커버) 안내 문구 + 비자/체류기간 만료
+  D-60 경고(`estimate_visa_expiry`)로 구성. ML/예측 모델이 아닌 정적 규칙(dict 매칭) 기반이며,
+  모두 "가상 Demo 기준, 실제 규정/정책 아님, 최종 판단은 GHD 담당자" 문구를 명시. 아래 "명시적으로
+  요청한 원칙"의 기존 "Proactive Care 추가 금지" 조항은 이 STEP으로 해제됨 (사용자 확인 후 진행).
 
 ## 핵심 아키텍처 결정 사항
 
@@ -118,7 +125,8 @@ Vercel 프로젝트(`alice-0d56/e-care`)에도 동일한 4개 값이 Production 
 
 - 각 단계 완료마다 장황한 설명 없이 바로 다음 단계로 진행 (GitHub/Vercel/Supabase
   로그인·권한 승인이 필요한 때만 사용자에게 묻고 대기)
-- 새로운 대형 기능 추가 금지 (Proactive Care, 예측 모델, ML, 모바일 앱, 실제
-  ETNERS 연동, 실제 개인정보 등 절대 추가하지 않음)
+- 새로운 대형 기능 추가 금지 (예측 모델, ML, 모바일 앱, 실제 ETNERS 연동, 실제
+  개인정보 등 절대 추가하지 않음). Proactive Care는 STEP 15에서 사용자 요청으로
+  추가됨 — 단, ML/예측 모델이 아닌 정적 규칙(dict 매칭) 기반으로 한정
 - 기존 이메일 전송 기능을 새로 만들지 않고 그대로 재사용
 - AI 판단과 GHD 담당자의 최종 처리 결과는 항상 구분해서 표시

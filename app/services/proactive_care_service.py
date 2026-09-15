@@ -1,5 +1,5 @@
-"""국적/비자유형/근무기간 등 임직원 속성을 기준으로 GHD가 선제적으로 확인하면
-좋은 항목을 미리 안내한다 (Proactive Care).
+"""국적/소속기업/비자유형/근무기간 등 임직원 속성을 기준으로 GHD가 선제적으로
+확인하면 좋은 항목을 미리 안내한다 (Proactive Care).
 
 ⚠ 여기서 쓰는 기준은 전부 프로젝트 시연용 가상 기준이다. 실제 출입국 규정이나
 고객사 정책이 아니며, AI가 법적/행정적 최종 판단을 내리는 것도 아니다. GHD 담당자가
@@ -27,6 +27,19 @@ NATIONALITY_NOTES = {
     "인도네시아": "이슬람 공휴일 기간 중 고향 방문 휴가 문의가 몰리는 경향이 있어 사전 안내 권장",
     "캄보디아": "서류 제출 시 크메르어 원본의 번역 공증 필요 여부를 미리 안내",
     "미얀마": "여권 갱신 절차가 상대적으로 오래 걸려 만료 임박 시 조기 안내 권장",
+}
+
+# 소속(파견) 고객사별 가상 Proactive Care 안내 (Demo 예시 — 실제 고객사 정책 아님)
+CLIENT_POLICY_NOTES = {
+    "그린로지스틱스": "물류센터 교대근무(주/야간) 배정 시 야간근무수당 산정 기준을 사전 안내 권장",
+    "대성정밀": "정밀공정 투입 전 보호구 착용 교육 이수 여부 사전 확인 필요",
+    "대한중공업부품": "중량물 취급 공정 배치 시 법정 안전교육 이수 여부 사전 확인 필요",
+    "신성테크": "3교대 근무표 변경 시 사전 공지 절차 안내 권장",
+    "우리식품": "식품위생법상 보건증(건강진단서) 유효기간을 사전 확인 필요",
+    "청우물류": "성수기(명절 전후) 연장근무 동의 여부를 사전 확인 권장",
+    "코스모스틸": "고온·분진 작업환경 보호구 지급 여부를 입사 초기 안내 권장",
+    "하나바이오": "위생복 착용·출입 보안 절차 교육 이수 여부 사전 확인 필요",
+    "한빛전자(주)": "정전기 방지(ESD) 교육 이수 여부 사전 확인 필요",
 }
 
 
@@ -75,6 +88,10 @@ def get_proactive_items(employee, today=None):
     note = NATIONALITY_NOTES.get(employee.get("nationality"))
     if note:
         items.append({"type": "nationality_note", "message": note, "severity": "LOW"})
+
+    client_note = CLIENT_POLICY_NOTES.get(employee.get("client_company"))
+    if client_note:
+        items.append({"type": "client_policy_note", "message": client_note, "severity": "LOW"})
 
     return items
 
