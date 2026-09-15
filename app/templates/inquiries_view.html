@@ -3,34 +3,199 @@
 {% block topbar_title %}문의 목록{% endblock %}
 
 {% block content %}
-<div class="admin-card">
-    <h3>문의 목록 (가상 데이터)</h3>
-    <p class="hint-text">총 {{ inquiries|length }}건. 각 문의를 클릭하면 1차 분석 및 구조화 결과를 볼 수 있습니다.</p>
-    <table class="inquiry-table">
-        <thead>
-            <tr>
-                <th>문의ID</th>
-                <th>문의일자</th>
-                <th>사번</th>
-                <th>카테고리</th>
-                <th>문의내용</th>
-                <th>Flag</th>
-                <th>긴급도</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for inq in inquiries %}
-            <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=inq.inquiry_id) }}'" style="cursor:pointer;">
-                <td><a href="{{ url_for('main.inquiry_detail_view', inquiry_id=inq.inquiry_id) }}">{{ inq.inquiry_id }}</a></td>
-                <td>{{ inq.inquiry_date }}</td>
-                <td>{{ inq.employee_id }}</td>
-                <td>{{ inq.category }}</td>
-                <td>{{ inq.inquiry_text }}</td>
-                <td><span class="badge badge-{{ inq.flag }}">{{ inq.flag }}</span></td>
-                <td><span class="badge badge-{{ inq.urgency }}">{{ inq.urgency }}</span></td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="tab-nav">
+    <button type="button" class="tab-btn" data-tab="all">전체 문의</button>
+    <button type="button" class="tab-btn" data-tab="proactive">선제 확인 필요</button>
+    <button type="button" class="tab-btn" data-tab="priority">우선 처리 필요</button>
+    <button type="button" class="tab-btn" data-tab="recent">최근 문의</button>
 </div>
+
+<!-- 전체 문의 -->
+<div class="tab-panel" id="tab-all">
+    <div class="admin-card">
+        <h3>전체 문의 (가상 데이터, 총 {{ inquiries|length }}건)</h3>
+        <p class="hint-text">각 문의를 클릭하면 1차 분석 및 구조화 결과를 볼 수 있습니다.</p>
+        <div class="table-scroll">
+            <table class="inquiry-table">
+                <thead>
+                    <tr>
+                        <th>문의ID</th>
+                        <th>문의일자</th>
+                        <th>사번</th>
+                        <th>카테고리</th>
+                        <th>문의내용</th>
+                        <th>Flag</th>
+                        <th>긴급도</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inq in inquiries %}
+                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=inq.inquiry_id) }}'" style="cursor:pointer;">
+                        <td><a href="{{ url_for('main.inquiry_detail_view', inquiry_id=inq.inquiry_id) }}">{{ inq.inquiry_id }}</a></td>
+                        <td>{{ inq.inquiry_date }}</td>
+                        <td>{{ inq.employee_id }}</td>
+                        <td>{{ inq.category }}</td>
+                        <td>{{ inq.inquiry_text }}</td>
+                        <td><span class="badge badge-{{ inq.flag }}">{{ inq.flag }}</span></td>
+                        <td><span class="badge badge-{{ inq.urgency }}">{{ inq.urgency }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 선제 확인 필요 (Proactive Care) -->
+<div class="tab-panel" id="tab-proactive">
+    <div class="admin-card">
+        <h3>선제 확인 필요 (Proactive Care)</h3>
+        <p class="hint-text">국적·비자유형·근무기간·소속 고객사를 바탕으로 문의가 들어오기 전에 GHD가 미리 챙기면 좋은 항목입니다.
+            가상 Demo 기준이며 실제 출입국 규정이나 고객사 정책이 아닙니다 — 최종 확인은 GHD 담당자가 합니다.</p>
+        {% if proactive_items %}
+        <div class="table-scroll">
+            <table class="inquiry-table">
+                <thead>
+                    <tr>
+                        <th>임직원</th>
+                        <th>국적</th>
+                        <th>소속</th>
+                        <th>긴급도</th>
+                        <th>선제 확인 항목</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in proactive_items %}
+                    <tr onclick="location.href='{{ url_for('main.employee_profile_view', employee_id=item.employee_id) }}'" style="cursor:pointer;">
+                        <td><a href="{{ url_for('main.employee_profile_view', employee_id=item.employee_id) }}">{{ item.employee_name }} ({{ item.employee_id }})</a></td>
+                        <td>{{ item.nationality }}</td>
+                        <td>{{ item.client_company }}</td>
+                        <td><span class="badge badge-{{ item.severity }}">{{ item.severity }}</span></td>
+                        <td>{{ item.message }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-text">지금 선제적으로 확인할 항목이 없습니다.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 우선 처리 필요 -->
+<div class="tab-panel" id="tab-priority">
+    <div class="admin-card">
+        <h3>우선 처리 필요 ({{ priority_total }}건 중 상위 {{ priority_items|length }}건)</h3>
+        <p class="hint-text">긴급 문의 → HR 회신 대기 → HR 확인 요청 → 추가 서류 요청 → 신규 문의 순으로 정렬되어 있습니다.
+            AI Priority는 카테고리·긴급도·HR 확인 필요 여부·처리 상태·비자 만료 임박 여부를 조합한 Rule-based 점수입니다.</p>
+        {% if priority_items %}
+        <div class="table-scroll">
+            <table class="inquiry-table">
+                <thead>
+                    <tr>
+                        <th>문의ID</th>
+                        <th>임직원</th>
+                        <th>문의 유형</th>
+                        <th>핵심 문의</th>
+                        <th>AI Priority</th>
+                        <th>현재 상태</th>
+                        <th>Due</th>
+                        <th>Next Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in priority_items %}
+                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;" title="{{ item.ai_priority.reason }}">
+                        <td><a href="{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}">{{ item.inquiry_id }}</a></td>
+                        <td><a href="{{ url_for('main.employee_profile_view', employee_id=item.employee_id) }}">{{ item.employee_name }}</a></td>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.key_issue }}</td>
+                        <td><span class="badge badge-{{ item.ai_priority.level }}">{{ item.ai_priority.level }}</span></td>
+                        <td><span class="badge badge-{{ status_badge_class.get(item.status, '') }}">{{ item.status }}</span></td>
+                        <td>{{ item.due.label }}</td>
+                        <td>{{ item.next_action }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-text">지금 우선 처리가 필요한 문의가 없습니다.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- 최근 문의 -->
+<div class="tab-panel" id="tab-recent">
+    <div class="admin-card">
+        <h3>최근 문의</h3>
+        <div class="table-scroll">
+            <table class="inquiry-table">
+                <thead>
+                    <tr>
+                        <th>접수일시</th>
+                        <th>임직원</th>
+                        <th>문의 유형</th>
+                        <th>핵심 문의</th>
+                        <th>Flag</th>
+                        <th>긴급도</th>
+                        <th>상태</th>
+                        <th>Next Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_items %}
+                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;">
+                        <td>{{ item.inquiry_date }}</td>
+                        <td><a href="{{ url_for('main.employee_profile_view', employee_id=item.employee_id) }}">{{ item.employee_name }}</a></td>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.key_issue }}</td>
+                        <td><span class="badge badge-{{ item.flag_type }}">{{ item.flag_type }}</span></td>
+                        <td><span class="badge badge-{{ item.urgency }}">{{ item.urgency }}</span></td>
+                        <td>{{ item.status }}</td>
+                        <td>{{ item.next_action }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var validTabs = ["all", "proactive", "priority", "recent"];
+    var params = new URLSearchParams(window.location.search);
+    var initialTab = params.get("tab");
+    if (validTabs.indexOf(initialTab) === -1) {
+        initialTab = "{{ active_tab }}";
+    }
+    if (validTabs.indexOf(initialTab) === -1) {
+        initialTab = "all";
+    }
+
+    function activate(tab) {
+        validTabs.forEach(function (t) {
+            var btn = document.querySelector('.tab-btn[data-tab="' + t + '"]');
+            var panel = document.getElementById("tab-" + t);
+            if (btn) btn.classList.toggle("active", t === tab);
+            if (panel) panel.classList.toggle("active", t === tab);
+        });
+    }
+
+    document.querySelectorAll(".tab-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            activate(btn.getAttribute("data-tab"));
+            var url = new URL(window.location.href);
+            url.searchParams.set("tab", btn.getAttribute("data-tab"));
+            window.history.replaceState({}, "", url);
+        });
+    });
+
+    activate(initialTab);
+})();
+</script>
 {% endblock %}

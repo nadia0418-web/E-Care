@@ -17,7 +17,7 @@
             <div class="field-row">
                 <div class="field-label">문의자</div>
                 <div class="field-value">
-                    {{ inquiry.employee_id }}
+                    <a href="{{ url_for('main.employee_profile_view', employee_id=inquiry.employee_id) }}">{{ inquiry.employee_id }}</a>
                     {% if employee %} · {{ employee.name }} ({{ employee.nationality }} / {{ employee.client_company }}){% endif %}
                 </div>
             </div>

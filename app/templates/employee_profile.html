@@ -1,0 +1,112 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ employee.name }} - Employee Care Profile - E-Care{% endblock %}
+{% block topbar_title %}Employee Care Profile{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('main.employees_view') }}">← 직원 데이터로</a>
+
+<div class="admin-card">
+    <div class="profile-header">
+        <div>
+            <div class="profile-name">{{ employee.name }} ({{ employee.employee_id }})</div>
+            <div class="profile-meta">
+                {{ employee.nationality }} · {{ employee.client_company }} · {{ employee.position }}
+                · 비자유형 {{ employee.visa_type }} · 입사일 {{ employee.start_date }}
+            </div>
+        </div>
+    </div>
+
+    <h3 style="margin-top:22px;">Care Progress</h3>
+    <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width: {{ progress.percent }}%;"></div>
+    </div>
+    <div class="progress-summary">
+        <span>{{ progress.completed }} / {{ progress.total }} Care Items Completed</span>
+        <span>{{ progress.percent }}%</span>
+    </div>
+</div>
+
+<div class="admin-card-grid" style="margin-bottom: 22px;">
+    <div class="admin-card" style="margin-bottom: 0;">
+        <h3>Open Care Items ({{ open_items|length }})</h3>
+        {% if open_items %}
+        {% for item in open_items %}
+        <div class="upcoming-item" onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'">
+            <div class="upcoming-item-main">
+                <div class="upcoming-item-title">
+                    <span class="badge badge-{{ item.ai_priority.level }}">{{ item.ai_priority.level }}</span>
+                    {{ item.category }}
+                </div>
+                <div class="upcoming-item-sub">{{ item.key_issue }}</div>
+            </div>
+            <div class="upcoming-item-due">{{ item.due.label }}</div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="empty-text">모든 Care 항목이 처리 완료되었습니다.</p>
+        {% endif %}
+    </div>
+
+    <div class="admin-card" style="margin-bottom: 0;">
+        <h3>HR Flags ({{ hr_flags|length }})</h3>
+        {% if hr_flags %}
+        {% for item in hr_flags %}
+        <div class="upcoming-item" onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'">
+            <div class="upcoming-item-main">
+                <div class="upcoming-item-title">
+                    <span class="badge badge-HR_FLAG">HR Review Required</span>
+                    {{ item.category }}
+                </div>
+                <div class="upcoming-item-sub">{{ item.key_issue }}</div>
+            </div>
+            <div class="upcoming-item-due">{{ item.status }}</div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="empty-text">현재 HR 확인이 필요한 항목이 없습니다.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if proactive_items %}
+<div class="admin-card">
+    <h3>선제 확인 필요 (Proactive Care)</h3>
+    <table class="inquiry-table">
+        <thead>
+            <tr>
+                <th>긴급도</th>
+                <th>선제 확인 항목</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in proactive_items %}
+            <tr>
+                <td><span class="badge badge-{{ item.severity }}">{{ item.severity }}</span></td>
+                <td>{{ item.message }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="admin-card">
+    <h3>Care Timeline</h3>
+    {% if timeline %}
+    <ol class="timeline-list">
+        {% for event in timeline %}
+        <li class="{{ 'timeline-fail' if not event.done }}">
+            <div class="timeline-label">
+                {{ event.label }}
+                <span class="timeline-event-category">{{ event.inquiry_id }} · {{ event.category }}</span>
+            </div>
+            {% if event.time %}<div class="timeline-time">{{ event.time }}</div>{% endif %}
+            <div class="timeline-detail">{{ event.detail }}</div>
+        </li>
+        {% endfor %}
+    </ol>
+    {% else %}
+    <p class="empty-text">아직 기록된 Care 활동이 없습니다.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, redirect, render_template, request, url_fo
 from app.services import (
     analysis_service,
     auth_service,
+    care_profile_service,
     dashboard_service,
     employee_service,
     inquiry_service,
@@ -173,6 +174,17 @@ def employee_detail(employee_id):
     return jsonify(employee)
 
 
+@main_bp.route("/employees/<employee_id>/profile")
+def employee_profile_view(employee_id):
+    """Employee Care Profile: 이 직원에게 지금까지 어떤 Care가 진행되었고
+    현재 무엇이 남아 있는지를 Care Progress + Open Care Items + HR Flag +
+    Care Timeline으로 한 화면에서 보여준다."""
+    profile = care_profile_service.get_employee_care_profile(employee_id)
+    if profile is None:
+        return render_template("not_found.html", kind="직원", target_id=employee_id, active_nav="employees"), 404
+    return render_template("employee_profile.html", active_nav="employees", **profile)
+
+
 @main_bp.route("/inquiries")
 def inquiries():
     """문의 데이터 로딩 확인용 테스트 라우트 (JSON 반환)."""
@@ -243,9 +255,25 @@ def structure_test():
 
 @main_bp.route("/inquiries-view")
 def inquiries_view():
-    """문의 목록을 사람이 보기 쉬운 화면으로 보여주고, 상세 화면으로 이동할 수 있게 한다."""
+    """문의 목록 화면: 전체 문의 / 선제 확인 필요 / 우선 처리 필요 / 최근 문의를
+    탭으로 묶어서 보여준다. ?tab= 쿼리로 홈 화면의 배너·KPI 카드에서 바로 원하는
+    탭으로 진입할 수 있다."""
     data = inquiry_service.get_all_inquiries()
-    return render_template("inquiries_view.html", inquiries=data, active_nav="inquiries")
+    dashboard_data = dashboard_service.get_dashboard_data(priority_limit=200, recent_limit=50)
+    active_tab = request.args.get("tab", "all")
+    if active_tab not in ("all", "proactive", "priority", "recent"):
+        active_tab = "all"
+    return render_template(
+        "inquiries_view.html",
+        inquiries=data,
+        active_nav="inquiries",
+        active_tab=active_tab,
+        status_badge_class=workflow_service.STATUS_BADGE_CLASS,
+        proactive_items=dashboard_data["proactive_items"],
+        priority_items=dashboard_data["priority_items"],
+        priority_total=dashboard_data["priority_total"],
+        recent_items=dashboard_data["recent_items"],
+    )
 
 
 def _load_inquiry_context(inquiry_id):

@@ -31,8 +31,8 @@
             </thead>
             <tbody>
                 {% for emp in employees %}
-                <tr>
-                    <td>{{ emp.employee_id }}</td>
+                <tr onclick="location.href='{{ url_for('main.employee_profile_view', employee_id=emp.employee_id) }}'" style="cursor:pointer;">
+                    <td><a href="{{ url_for('main.employee_profile_view', employee_id=emp.employee_id) }}">{{ emp.employee_id }}</a></td>
                     <td>{{ emp.name }}</td>
                     <td>{{ emp.nationality }}</td>
                     <td>{{ emp.client_company }}</td>

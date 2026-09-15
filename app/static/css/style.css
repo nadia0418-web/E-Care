@@ -905,3 +905,224 @@ p {
         padding: 14px 16px;
     }
 }
+
+/* ---- 홈 상단 긴급 배너 (선제 확인/우선 처리/최근 문의 요약) ---- */
+.alert-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 22px;
+}
+
+.alert-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+    border-left: 4px solid #ccc;
+    border-radius: 8px;
+    padding: 11px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brand-charcoal);
+    text-decoration: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.alert-banner:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.alert-banner.level-critical { border-left-color: #d64545; }
+.alert-banner.level-warning { border-left-color: var(--brand-orange); }
+.alert-banner.level-info { border-left-color: #2b6cb0; }
+
+.alert-banner-arrow {
+    color: #999;
+    font-weight: 700;
+    flex: 0 0 auto;
+}
+
+/* ---- 클릭 가능한 KPI 카드 ---- */
+a.admin-kpi-card {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ---- 탭 네비게이션 (문의 목록: 전체/선제 확인/우선 처리/최근 문의) ---- */
+.tab-nav {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #e5e7eb;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #888;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.tab-btn:hover {
+    color: var(--brand-charcoal);
+}
+
+.tab-btn.active {
+    color: var(--brand-charcoal);
+    border-bottom-color: var(--brand-orange);
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* ---- Care Progress bar (Employee Care Profile) ---- */
+.progress-bar-track {
+    background: #eee;
+    border-radius: 999px;
+    height: 10px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    background: var(--brand-orange);
+    height: 100%;
+    border-radius: 999px;
+}
+
+.progress-summary {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #777;
+    margin-top: 6px;
+}
+
+/* ---- AI Care Insight 카드 ---- */
+.insight-message {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--brand-charcoal);
+    margin-bottom: 4px;
+}
+
+.insight-recommendation {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 14px;
+}
+
+.btn-brand {
+    display: inline-block;
+    background: var(--brand-orange);
+    color: #fff;
+    border: none;
+    padding: 9px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-brand:hover {
+    background: var(--brand-orange-dark);
+}
+
+/* ---- Upcoming Care 목록 ---- */
+.upcoming-count-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.upcoming-count-chip {
+    background: #f5f6f8;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand-charcoal);
+}
+
+.upcoming-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 4px;
+    border-bottom: 1px dashed #eee;
+    cursor: pointer;
+}
+
+.upcoming-item:last-child {
+    border-bottom: none;
+}
+
+.upcoming-item:hover {
+    background: #fafafa;
+}
+
+.upcoming-item-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.upcoming-item-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brand-charcoal);
+}
+
+.upcoming-item-sub {
+    font-size: 12px;
+    color: #888;
+}
+
+.upcoming-item-due {
+    font-size: 12px;
+    font-weight: 700;
+    color: #888;
+    white-space: nowrap;
+}
+
+/* ---- Employee Care Profile ---- */
+.profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.profile-name {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--brand-charcoal);
+}
+
+.profile-meta {
+    font-size: 13px;
+    color: #777;
+    margin-top: 2px;
+}
+
+.timeline-event-category {
+    font-size: 11px;
+    color: #999;
+    margin-left: 6px;
+}
