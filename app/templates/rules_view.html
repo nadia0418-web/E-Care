@@ -1,0 +1,53 @@
+{% extends "admin_base.html" %}
+{% block title %}관련 내규 - E-Care{% endblock %}
+{% block topbar_title %}관련 내규{% endblock %}
+
+{% block content %}
+<div class="disclaimer">
+    ⚠ 아래 내용은 실제 ETNERS/고객사의 공식 규정이 아닌, 프로젝트 시연을 위한 가상 GHD 업무 판단 기준입니다.
+    문의 분석 시 참고 자료로만 사용되며, 최종 판단은 GHD 담당자가 합니다.
+</div>
+
+<div class="admin-card">
+    <h3>관련 내규 목록 (총 {{ rules|length }}건)</h3>
+    <div class="card-list">
+        {% for rule in rules %}
+        <div class="mini-card">
+            <div class="mini-card-header">
+                <span class="mini-card-id">{{ rule.rule_id }}</span> {{ rule.rule_name }}
+                <span class="tag">{{ rule.category }}</span>
+                <span class="badge badge-{{ rule.urgency }}">{{ rule.urgency }}</span>
+            </div>
+            <div class="field-row">
+                <div class="field-label">적용 상황</div>
+                <div class="field-value">{{ rule.situation }}</div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">주요 키워드</div>
+                <div class="field-value">
+                    <div class="tag-list">
+                        {% for kw in rule.keywords %}
+                        <span class="tag">{{ kw }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">담당</div>
+                <div class="field-value">{{ rule.handler }} · HR 확인 필요: <strong>{{ "YES" if rule.hr_flag else "NO" }}</strong></div>
+            </div>
+            <div class="field-row">
+                <div class="field-label">판단 근거</div>
+                <div class="field-value">{{ rule.reasoning }}</div>
+            </div>
+            {% if rule.note %}
+            <div class="field-row">
+                <div class="field-label">참고사항</div>
+                <div class="field-value">{{ rule.note }}</div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

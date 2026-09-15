@@ -1,31 +1,44 @@
 {% extends "admin_base.html" %}
-{% block title %}GHD 업무 현황판 - E-Care{% endblock %}
-{% block topbar_title %}GHD 업무 현황판{% endblock %}
+{% block title %}홈 - E-Care{% endblock %}
+{% block topbar_title %}홈{% endblock %}
 
 {% block content %}
+<div class="home-greeting">
+    <div class="home-greeting-title">
+        {% if current_user %}{{ current_user }}님, 안녕하세요 👋{% else %}안녕하세요 👋{% endif %}
+    </div>
+    <div class="home-greeting-sub">외국인 임직원 문의 대응 업무지원 시스템 · 오늘의 GHD 업무 현황입니다.</div>
+</div>
+
 <!-- KPI -->
 <div class="admin-kpi-row">
     <div class="admin-kpi-card">
+        <div class="admin-kpi-icon">📊</div>
         <div class="admin-kpi-number">{{ kpi.total }}</div>
         <div class="admin-kpi-label">전체 문의</div>
     </div>
     <div class="admin-kpi-card">
+        <div class="admin-kpi-icon">🗂️</div>
         <div class="admin-kpi-number">{{ kpi.unresolved }}</div>
         <div class="admin-kpi-label">미처리 문의</div>
     </div>
     <div class="admin-kpi-card">
+        <div class="admin-kpi-icon">⏳</div>
         <div class="admin-kpi-number">{{ kpi.hr_confirm_waiting }}</div>
         <div class="admin-kpi-label">HR 확인 대기</div>
     </div>
     <div class="admin-kpi-card">
+        <div class="admin-kpi-icon">📮</div>
         <div class="admin-kpi-number">{{ kpi.hr_reply_waiting }}</div>
         <div class="admin-kpi-label">HR 회신 대기</div>
     </div>
     <div class="admin-kpi-card is-urgent">
+        <div class="admin-kpi-icon">🚨</div>
         <div class="admin-kpi-number">{{ kpi.urgent }}</div>
         <div class="admin-kpi-label">긴급 문의</div>
     </div>
     <div class="admin-kpi-card is-done">
+        <div class="admin-kpi-icon">✅</div>
         <div class="admin-kpi-number">{{ kpi.resolved_today }}</div>
         <div class="admin-kpi-label">오늘 처리 완료</div>
     </div>

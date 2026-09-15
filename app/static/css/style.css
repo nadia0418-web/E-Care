@@ -8,7 +8,7 @@
 }
 
 body {
-    font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+    font-family: "Noto Sans KR", "Segoe UI", "Malgun Gothic", sans-serif;
     background-color: #f5f6f8;
     margin: 0;
     color: #222;
@@ -476,7 +476,7 @@ p {
    관리자 로그인 화면
    ================================================================== */
 .login-page {
-    background: var(--brand-charcoal);
+    background: radial-gradient(circle at 30% 20%, #34383F 0%, var(--brand-charcoal) 60%);
     margin: 0;
 }
 
@@ -494,13 +494,14 @@ p {
     width: 100%;
     max-width: 360px;
     padding: 40px 32px;
-    border-radius: 14px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    border-radius: 16px;
+    box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4);
     box-sizing: border-box;
+    border-top: 4px solid var(--brand-orange);
 }
 
 .login-logo {
-    font-size: 26px;
+    font-size: 28px;
     font-weight: 800;
     color: var(--brand-orange);
     text-align: center;
@@ -542,67 +543,88 @@ p {
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .login-btn:hover {
     background: var(--brand-orange-dark);
+    transform: translateY(-1px);
 }
 
 /* ==================================================================
-   관리자 대시보드 (사이드바 레이아웃)
+   관리자 화면 (사이드바 레이아웃)
    ================================================================== */
 .admin-shell {
     display: flex;
     min-height: 100vh;
-    background: #F3F4F6;
+    background: #EEF0F3;
 }
 
 .admin-sidebar {
-    width: 224px;
-    flex: 0 0 224px;
-    background: var(--brand-charcoal);
+    width: 232px;
+    flex: 0 0 232px;
+    background: linear-gradient(180deg, #26292F 0%, var(--brand-charcoal) 100%);
     color: #cfd2d6;
-    padding: 22px 0;
+    padding: 24px 14px;
     box-sizing: border-box;
 }
 
 .admin-logo {
-    font-size: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 21px;
     font-weight: 800;
     color: var(--brand-orange);
-    padding: 0 22px 24px;
+    padding: 0 8px 22px;
     letter-spacing: -0.5px;
+}
+
+.admin-logo-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--brand-orange);
+    box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.2);
 }
 
 .admin-nav-section {
     text-transform: uppercase;
     font-size: 11px;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     color: #7a7f87;
-    padding: 14px 22px 6px;
+    padding: 10px 10px 8px;
 }
 
 .admin-nav-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 11px 22px;
+    padding: 11px 12px;
+    margin: 2px 0;
     color: #cfd2d6;
     text-decoration: none;
     font-size: 14px;
-    border-left: 3px solid transparent;
+    border-radius: 9px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-nav-icon {
+    font-size: 15px;
+    width: 20px;
+    text-align: center;
 }
 
 .admin-nav-item:hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
     color: #fff;
 }
 
 .admin-nav-item.active {
-    background: rgba(255, 106, 0, 0.14);
+    background: var(--brand-orange);
     color: #fff;
-    font-weight: 600;
-    border-left-color: var(--brand-orange);
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(255, 106, 0, 0.35);
 }
 
 .admin-main {
@@ -617,12 +639,16 @@ p {
     align-items: center;
     justify-content: space-between;
     background: #fff;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 16px 30px;
+    border-bottom: 1px solid #e9eaec;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    padding: 16px 32px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
 }
 
 .admin-topbar-title {
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 800;
     color: var(--brand-charcoal);
 }
@@ -630,18 +656,34 @@ p {
 .admin-topbar-right {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 18px;
     font-size: 13px;
     color: #555;
 }
 
 .admin-user-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f2f3f5;
+    color: var(--brand-charcoal);
+    border-radius: 999px;
+    padding: 4px 14px 4px 4px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
     background: var(--brand-charcoal);
     color: #fff;
-    border-radius: 999px;
-    padding: 4px 12px;
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 800;
 }
 
 .admin-logout {
@@ -655,36 +697,77 @@ p {
 }
 
 .admin-content {
-    padding: 26px 30px 50px;
+    padding: 28px 32px 56px;
+}
+
+/* ---- 홈 인사말 배너 ---- */
+.home-greeting {
+    margin-bottom: 22px;
+}
+
+.home-greeting-title {
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--brand-charcoal);
+}
+
+.home-greeting-sub {
+    font-size: 13px;
+    color: #777;
+    margin-top: 4px;
 }
 
 .admin-kpi-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 16px;
-    margin-bottom: 24px;
+    margin-bottom: 26px;
 }
 
 .admin-kpi-card {
+    position: relative;
     background: #fff;
-    border-radius: 12px;
-    padding: 18px 16px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-    border-top: 3px solid var(--brand-orange);
+    border-radius: 14px;
+    padding: 18px 18px 16px;
+    box-shadow: 0 2px 10px rgba(18, 20, 24, 0.06);
+    overflow: hidden;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.admin-kpi-card.is-urgent {
-    border-top-color: #d64545;
+.admin-kpi-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--brand-orange), #ffb27a);
 }
 
-.admin-kpi-card.is-done {
-    border-top-color: #1c9e5a;
+.admin-kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(18, 20, 24, 0.1);
+}
+
+.admin-kpi-card.is-urgent::before {
+    background: linear-gradient(90deg, #d64545, #ff9494);
+}
+
+.admin-kpi-card.is-done::before {
+    background: linear-gradient(90deg, #1c9e5a, #7fe0ab);
+}
+
+.admin-kpi-icon {
+    font-size: 15px;
+    opacity: 0.7;
+    margin-bottom: 8px;
 }
 
 .admin-kpi-number {
     font-size: 28px;
     font-weight: 800;
     color: var(--brand-charcoal);
+    line-height: 1.1;
 }
 
 .admin-kpi-card.is-urgent .admin-kpi-number {
@@ -703,9 +786,9 @@ p {
 
 .admin-card {
     background: #fff;
-    border-radius: 12px;
-    padding: 20px 22px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: 0 2px 10px rgba(18, 20, 24, 0.06);
     margin-bottom: 22px;
 }
 
@@ -713,12 +796,58 @@ p {
     margin: 0 0 14px;
     color: var(--brand-charcoal);
     font-size: 15px;
+    font-weight: 800;
     border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
+}
+
+.admin-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px;
+}
+
+.admin-card-grid .admin-card {
+    margin-bottom: 0;
 }
 
 .admin-content .inquiry-table th {
     background: var(--brand-charcoal);
+}
+
+.admin-content .inquiry-table tbody tr {
+    transition: background 0.1s ease;
+}
+
+.table-scroll {
+    overflow-x: auto;
+}
+
+/* ---- 직원 데이터 입력 폼 ---- */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-field-checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.form-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #666;
 }
 
 @media (max-width: 760px) {

@@ -3,25 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}E-Care{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="admin-shell">
         <aside class="admin-sidebar">
-            <div class="admin-logo">E-Care</div>
+            <div class="admin-logo">E-Care<span class="admin-logo-dot"></span></div>
             <div class="admin-nav-section">메뉴</div>
-            <a class="admin-nav-item {% if active_nav == 'dashboard' %}active{% endif %}" href="{{ url_for('main.dashboard') }}">📊 Dashboard</a>
-            <a class="admin-nav-item {% if active_nav == 'inquiries' %}active{% endif %}" href="{{ url_for('main.inquiries_view') }}">📨 문의 목록</a>
-            <a class="admin-nav-item {% if active_nav == 'employees' %}active{% endif %}" href="{{ url_for('main.employees') }}">👤 직원 데이터</a>
-            <a class="admin-nav-item {% if active_nav == 'ghd_rules' %}active{% endif %}" href="{{ url_for('main.ghd_rules') }}">📋 가상 GHD 판단 기준</a>
-            <a class="admin-nav-item {% if active_nav == 'home' %}active{% endif %}" href="{{ url_for('main.index') }}">🏠 홈</a>
+            <a class="admin-nav-item {% if active_nav == 'home' %}active{% endif %}" href="{{ url_for('main.index') }}"><span class="admin-nav-icon">🏠</span>홈</a>
+            <a class="admin-nav-item {% if active_nav == 'inquiries' %}active{% endif %}" href="{{ url_for('main.inquiries_view') }}"><span class="admin-nav-icon">📨</span>문의 목록</a>
+            <a class="admin-nav-item {% if active_nav == 'employees' %}active{% endif %}" href="{{ url_for('main.employees_view') }}"><span class="admin-nav-icon">👤</span>직원 데이터</a>
+            <a class="admin-nav-item {% if active_nav == 'rules' %}active{% endif %}" href="{{ url_for('main.ghd_rules_view') }}"><span class="admin-nav-icon">📋</span>관련 내규</a>
         </aside>
 
         <div class="admin-main">
             <header class="admin-topbar">
                 <div class="admin-topbar-title">{% block topbar_title %}E-Care{% endblock %}</div>
                 <div class="admin-topbar-right">
-                    {% if current_user %}<span class="admin-user-badge">{{ current_user }}</span>{% endif %}
+                    {% if current_user %}
+                    <span class="admin-user-badge">
+                        <span class="admin-user-avatar">{{ current_user[0]|upper }}</span>
+                        {{ current_user }}
+                    </span>
+                    {% endif %}
                     <a class="admin-logout" href="{{ url_for('main.logout_view') }}">로그아웃</a>
                 </div>
             </header>

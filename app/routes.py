@@ -46,7 +46,7 @@ def _inject_current_user():
 
 @main_bp.route("/login", methods=["GET", "POST"])
 def login_view():
-    next_url = request.values.get("next") or url_for("main.dashboard")
+    next_url = request.values.get("next") or url_for("main.index")
     error = None
     if request.method == "POST":
         username = request.form.get("username", "")
@@ -66,20 +66,21 @@ def logout_view():
 
 @main_bp.route("/")
 def index():
-    return render_template("index.html", project_name="E-Care", active_nav="home")
-
-
-@main_bp.route("/dashboard")
-def dashboard():
-    """GHD 업무 현황판: KPI + 우선 처리 필요 + 최근 문의. 모든 수치는 매 요청마다
-    문의 데이터와 처리 상태에서 동적으로 계산한다 (하드코딩 없음)."""
+    """홈: GHD 업무 현황판을 겸한다 (KPI + Proactive Care + 우선 처리 필요 + 최근 문의).
+    모든 수치는 매 요청마다 문의 데이터와 처리 상태에서 동적으로 계산한다 (하드코딩 없음)."""
     data = dashboard_service.get_dashboard_data()
     return render_template(
-        "dashboard.html",
-        active_nav="dashboard",
+        "home.html",
+        active_nav="home",
         status_badge_class=workflow_service.STATUS_BADGE_CLASS,
         **data,
     )
+
+
+@main_bp.route("/dashboard")
+def dashboard_redirect():
+    """이전 /dashboard 링크(공유된 데모 URL 등) 호환용 리다이렉트. 홈과 통합되었다."""
+    return redirect(url_for("main.index"))
 
 
 @main_bp.route("/employees")
@@ -87,6 +88,81 @@ def employees():
     """직원 데이터 로딩 확인용 테스트 라우트 (JSON 반환)."""
     data = employee_service.get_all_employees()
     return jsonify({"count": len(data), "employees": data})
+
+
+@main_bp.route("/employees-view")
+def employees_view():
+    """직원 데이터 화면: 목록 조회 + 수기 입력/엑셀 업로드로 신규 직원을 등록한다."""
+    data = employee_service.get_all_employees()
+    return render_template(
+        "employees_view.html",
+        employees=data,
+        active_nav="employees",
+        employment_period_choices=employee_service.EMPLOYMENT_PERIOD_CHOICES,
+        form_result=None,
+    )
+
+
+@main_bp.route("/employees-view/add", methods=["POST"])
+def add_employee_view():
+    """직원 1명을 수기 입력 폼으로 추가한다."""
+    record = {
+        "name": request.form.get("name", ""),
+        "nationality": request.form.get("nationality", ""),
+        "client_company": request.form.get("client_company", ""),
+        "position": request.form.get("position", ""),
+        "start_date": request.form.get("start_date", ""),
+        "employment_period": request.form.get("employment_period", ""),
+        "family_accompanied": request.form.get("family_accompanied") == "on",
+        "visa_type": request.form.get("visa_type", ""),
+    }
+    added = employee_service.add_employees([record])
+    if added:
+        form_result = {
+            "success": True,
+            "message": f"{added[0]['employee_id']} ({added[0]['name']}) 직원이 추가되었습니다.",
+        }
+    else:
+        form_result = {"success": False, "message": "이름이 입력되지 않아 추가하지 못했습니다."}
+
+    data = employee_service.get_all_employees()
+    return render_template(
+        "employees_view.html",
+        employees=data,
+        active_nav="employees",
+        employment_period_choices=employee_service.EMPLOYMENT_PERIOD_CHOICES,
+        form_result=form_result,
+    )
+
+
+@main_bp.route("/employees-view/upload", methods=["POST"])
+def upload_employees_view():
+    """엑셀 파일로 직원 데이터를 일괄 등록한다."""
+    file = request.files.get("employees_file")
+    if not file or not file.filename:
+        form_result = {"success": False, "message": "업로드할 엑셀(.xlsx) 파일을 선택해주세요."}
+    else:
+        try:
+            records = employee_service.parse_upload_workbook(file.stream)
+            added = employee_service.add_employees(records)
+            if added:
+                form_result = {"success": True, "message": f"{len(added)}건이 업로드되었습니다."}
+            else:
+                form_result = {
+                    "success": False,
+                    "message": "업로드한 파일에서 추가할 직원 데이터를 찾지 못했습니다 (이름 컬럼 확인).",
+                }
+        except Exception as e:  # 잘못된 파일 형식이 앱 전체 오류로 번지지 않도록 방어
+            form_result = {"success": False, "message": f"업로드 처리 중 오류가 발생했습니다: {e}"}
+
+    data = employee_service.get_all_employees()
+    return render_template(
+        "employees_view.html",
+        employees=data,
+        active_nav="employees",
+        employment_period_choices=employee_service.EMPLOYMENT_PERIOD_CHOICES,
+        form_result=form_result,
+    )
 
 
 @main_bp.route("/employees/<employee_id>")
@@ -125,6 +201,13 @@ def ghd_rules():
     """가상 GHD 업무 판단 기준 로딩 확인용 테스트 라우트 (JSON 반환)."""
     data = rule_service.get_all_rules()
     return jsonify({"count": len(data), "rules": data})
+
+
+@main_bp.route("/ghd-rules-view")
+def ghd_rules_view():
+    """관련 내규 화면: 가상 GHD 업무 판단 기준을 사람이 보기 쉬운 표로 보여준다."""
+    data = rule_service.get_all_rules()
+    return render_template("rules_view.html", rules=data, active_nav="rules")
 
 
 @main_bp.route("/ghd-rules/<rule_id>")

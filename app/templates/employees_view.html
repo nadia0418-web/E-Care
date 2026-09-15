@@ -1,0 +1,109 @@
+{% extends "admin_base.html" %}
+{% block title %}직원 데이터 - E-Care{% endblock %}
+{% block topbar_title %}직원 데이터{% endblock %}
+
+{% block content %}
+<div class="disclaimer">
+    ⚠ 아래에서 등록하는 직원 데이터는 프로젝트 시연용 가상 데이터입니다. 실제 임직원의 개인정보를 입력하지 마세요.
+    등록한 데이터는 홈의 Proactive Care·KPI 등 다른 화면에도 자동으로 반영됩니다.
+</div>
+
+{% if form_result %}
+<div class="{{ 'confirmed-box' if form_result.success else 'error-box' }}">{{ form_result.message }}</div>
+{% endif %}
+
+<div class="admin-card">
+    <h3>직원 목록 (총 {{ employees|length }}명)</h3>
+    <div class="table-scroll">
+        <table class="inquiry-table">
+            <thead>
+                <tr>
+                    <th>사번</th>
+                    <th>이름</th>
+                    <th>국적</th>
+                    <th>소속회사</th>
+                    <th>직급</th>
+                    <th>입사일</th>
+                    <th>근무기간</th>
+                    <th>가족동반</th>
+                    <th>비자유형</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for emp in employees %}
+                <tr>
+                    <td>{{ emp.employee_id }}</td>
+                    <td>{{ emp.name }}</td>
+                    <td>{{ emp.nationality }}</td>
+                    <td>{{ emp.client_company }}</td>
+                    <td>{{ emp.position }}</td>
+                    <td>{{ emp.start_date }}</td>
+                    <td>{{ emp.employment_period }}</td>
+                    <td>{{ "예" if emp.family_accompanied else "아니오" }}</td>
+                    <td>{{ emp.visa_type }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="admin-card-grid">
+    <div class="admin-card">
+        <h3>직원 추가 (수기 입력)</h3>
+        <form method="post" action="{{ url_for('main.add_employee_view') }}">
+            <div class="form-grid">
+                <label class="form-field">
+                    <span class="form-label">이름</span>
+                    <input type="text" name="name" class="text-input" required>
+                </label>
+                <label class="form-field">
+                    <span class="form-label">국적</span>
+                    <input type="text" name="nationality" class="text-input" required>
+                </label>
+                <label class="form-field">
+                    <span class="form-label">소속회사</span>
+                    <input type="text" name="client_company" class="text-input" required>
+                </label>
+                <label class="form-field">
+                    <span class="form-label">직급</span>
+                    <input type="text" name="position" class="text-input">
+                </label>
+                <label class="form-field">
+                    <span class="form-label">입사일</span>
+                    <input type="date" name="start_date" class="text-input" required>
+                </label>
+                <label class="form-field">
+                    <span class="form-label">근무기간</span>
+                    <select name="employment_period" class="text-input">
+                        {% for choice in employment_period_choices %}
+                        <option value="{{ choice }}">{{ choice }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="form-field">
+                    <span class="form-label">비자유형</span>
+                    <input type="text" name="visa_type" class="text-input" placeholder="예: E-9">
+                </label>
+                <label class="form-field form-field-checkbox">
+                    <input type="checkbox" name="family_accompanied">
+                    <span class="form-label">가족동반</span>
+                </label>
+            </div>
+            <button type="submit" class="btn-primary">직원 추가</button>
+        </form>
+    </div>
+
+    <div class="admin-card">
+        <h3>엑셀 파일로 일괄 업로드</h3>
+        <p class="hint-text">
+            1행은 헤더(자동 무시)이며, 2행부터 다음 순서로 입력해주세요:<br>
+            <strong>이름 · 국적 · 소속회사 · 직급 · 입사일(YYYY-MM-DD) · 근무기간 · 가족동반(예/아니오) · 비자유형</strong>
+        </p>
+        <form method="post" action="{{ url_for('main.upload_employees_view') }}" enctype="multipart/form-data">
+            <input type="file" name="employees_file" accept=".xlsx" class="text-input" required>
+            <button type="submit" class="btn-primary">업로드</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
