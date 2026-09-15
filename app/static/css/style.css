@@ -39,25 +39,30 @@ p {
     margin: 0;
 }
 
-/* ---- 공통 레이아웃 (목록/상세 페이지) ---- */
-.page {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 24px 20px 60px;
+/* ---- 링크 (관리자 화면 콘텐츠 영역 공통) ---- */
+.admin-content a {
+    color: var(--brand-charcoal);
+    text-decoration: none;
+    font-weight: 700;
 }
 
-.page a {
-    color: #2b6cb0;
-}
-
-.page-header h2 {
-    margin-bottom: 4px;
+.admin-content a:hover {
+    color: var(--brand-orange);
+    text-decoration: underline;
 }
 
 .back-link {
     display: inline-block;
     margin-bottom: 16px;
     font-size: 14px;
+    color: #888;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: var(--brand-orange);
+    text-decoration: underline;
 }
 
 .disclaimer {
