@@ -4,3 +4,6 @@ venv/
 .env
 !.env.example
 data/hr_workflow_state.json
+
+.vercel
+.env*

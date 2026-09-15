@@ -178,6 +178,83 @@ def get_state(inquiry_id):
     return _get_state_json(inquiry_id)
 
 
+def get_states_for_inquiries(inquiry_ids):
+    """여러 문의의 진행 상태를 한 번에 배치 조회한다 (Dashboard처럼 다건을 볼 때 사용).
+
+    문의 건수만큼 반복 조회(N+1)하면 Supabase 호출이 폭증해 타임아웃/연결 끊김이
+    발생하므로, 테이블당 1회의 `in_()` 질의로 모아서 가져온다."""
+    ids = list(inquiry_ids)
+    empty = lambda: {  # noqa: E731
+        "completed_steps": [],
+        "email_log": [],
+        "hr_reply": None,
+        "final_guidance": None,
+        "resolution": None,
+    }
+
+    client = supabase_client.get_client()
+    if not client:
+        return {iid: _get_state_json(iid) for iid in ids}
+
+    if not ids:
+        return {}
+
+    result = {iid: empty() for iid in ids}
+
+    steps_res = (
+        client.table("action_steps")
+        .select("inquiry_id, step_number")
+        .in_("inquiry_id", ids)
+        .eq("completed", True)
+        .execute()
+    )
+    for r in steps_res.data:
+        result[r["inquiry_id"]]["completed_steps"].append(r["step_number"])
+    for state in result.values():
+        state["completed_steps"].sort()
+
+    email_res = (
+        client.table("hr_communications").select("*").in_("inquiry_id", ids).order("sent_at").execute()
+    )
+    for e in email_res.data:
+        result[e["inquiry_id"]]["email_log"].append(
+            {
+                "sent_at": e["sent_at"],
+                "subject": e["subject"],
+                "body": e["body"],
+                "recipient": e["recipient"],
+                "success": e["success"],
+                "error": e["error"],
+            }
+        )
+
+    reply_res = client.table("hr_replies").select("*").in_("inquiry_id", ids).execute()
+    for row in reply_res.data:
+        iid = row["inquiry_id"]
+        result[iid]["hr_reply"] = {
+            "replied_at": row["replied_at"],
+            "content": row["content"],
+            "replier": row["replier"],
+            "additional_request": row["additional_request"],
+            "registered_at": row["registered_at"],
+        }
+        if row.get("final_guidance_content"):
+            result[iid]["final_guidance"] = {
+                "content": row["final_guidance_content"],
+                "confirmed_at": row["final_guidance_confirmed_at"],
+            }
+
+    result_res = client.table("processing_results").select("*").in_("inquiry_id", ids).execute()
+    for row in result_res.data:
+        result[row["inquiry_id"]]["resolution"] = {
+            "outcome": row["outcome"],
+            "memo": row["memo"],
+            "recorded_at": row["recorded_at"],
+        }
+
+    return result
+
+
 def save_completed_steps(inquiry_id, completed_step_numbers):
     numbers = sorted(set(completed_step_numbers))
 
@@ -321,17 +398,22 @@ def save_resolution(inquiry_id, outcome, memo):
     return state
 
 
-def get_workflow_status(inquiry_id, structured):
+def get_workflow_status(inquiry_id, structured, state=None):
     """문의 1건의 현재 처리 상태를 INQUIRY_STATUSES 중 하나로 계산한다.
     (분석 자체는 매 요청마다 즉시 자동 실행되므로 "신규 문의"/"분석 완료"는
-    이 함수가 반환하지 않는다 — 이미 그 다음 단계로 넘어간 것으로 본다.)"""
-    state = get_state(inquiry_id)
+    이 함수가 반환하지 않는다 — 이미 그 다음 단계로 넘어간 것으로 본다.)
+
+    state를 미리 조회해 넘기면(예: Dashboard에서 배치 조회한 결과) 중복 조회를
+    피할 수 있다. 넘기지 않으면 이 함수가 직접 get_state()로 조회한다."""
+    if state is None:
+        state = get_state(inquiry_id)
 
     if state["resolution"]:
         return "처리 완료"
 
     if structured["requires_hr_email"]:
-        return "HR 회신 대기" if has_successful_email(inquiry_id) else "HR 확인 요청"
+        has_email = any(e["success"] for e in state["email_log"])
+        return "HR 회신 대기" if has_email else "HR 확인 요청"
 
     if structured["required_documents"]:
         doc_step = next(

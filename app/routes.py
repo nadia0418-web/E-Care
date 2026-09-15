@@ -140,9 +140,9 @@ def _render_detail(inquiry, employee, structured, send_result=None, email_draft_
     """Inquiry Detail 화면 렌더링에 필요한 모든 조회를 모아 처리하는 공통 헬퍼."""
     inquiry_id = inquiry["inquiry_id"]
     workflow_state = workflow_service.get_state(inquiry_id)
-    workflow_status = workflow_service.get_workflow_status(inquiry_id, structured)
+    workflow_status = workflow_service.get_workflow_status(inquiry_id, structured, state=workflow_state)
     status_badge_class = workflow_service.STATUS_BADGE_CLASS.get(workflow_status, "SITUATION_CHECK")
-    last_email = workflow_service.get_last_email(inquiry_id)
+    last_email = workflow_state["email_log"][-1] if workflow_state["email_log"] else None
     timeline = workflow_service.build_timeline(inquiry, structured, workflow_state)
 
     if email_draft_override is not None:

@@ -12,7 +12,7 @@ from app.services import employee_service, inquiry_service, structuring_service,
 PRIORITY_ORDER = ["긴급 문의", "HR 회신 대기", "HR 확인 요청", "추가 서류 요청", "신규 문의"]
 
 
-def _summarize_inquiry(inquiry):
+def _summarize_inquiry(inquiry, state):
     employee = employee_service.get_employee_by_id(inquiry["employee_id"])
     structured = structuring_service.structure_inquiry(
         inquiry["inquiry_text"],
@@ -20,8 +20,7 @@ def _summarize_inquiry(inquiry):
         employee=employee,
         exclude_inquiry_id=inquiry["inquiry_id"],
     )
-    state = workflow_service.get_state(inquiry["inquiry_id"])
-    status = workflow_service.get_workflow_status(inquiry["inquiry_id"], structured)
+    status = workflow_service.get_workflow_status(inquiry["inquiry_id"], structured, state=state)
 
     completed = set(state["completed_steps"])
     next_step = next((s for s in structured["workflow_steps"] if s["step"] not in completed), None)
@@ -63,7 +62,10 @@ def _summarize_inquiry(inquiry):
 
 def get_dashboard_data(priority_limit=15, recent_limit=15):
     inquiries = inquiry_service.get_all_inquiries()
-    summaries = [_summarize_inquiry(inq) for inq in inquiries]
+    # 문의 건수만큼 진행 상태를 반복 조회(N+1)하면 Supabase 호출이 폭증하므로,
+    # 배치로 한 번에 가져와 각 문의에 매칭한다.
+    states = workflow_service.get_states_for_inquiries([inq["inquiry_id"] for inq in inquiries])
+    summaries = [_summarize_inquiry(inq, states[inq["inquiry_id"]]) for inq in inquiries]
 
     kpi = {
         "total": len(summaries),
