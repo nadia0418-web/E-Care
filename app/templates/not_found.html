@@ -1,17 +1,11 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <title>찾을 수 없음 - E-Care</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-</head>
-<body>
-    <div class="page">
-        <div class="section-card">
-            <h3>{{ kind }}를 찾을 수 없습니다</h3>
-            <p>ID "{{ target_id }}"에 해당하는 {{ kind }}가 없습니다.</p>
-            <p><a href="{{ url_for('main.inquiries_view') }}">← 문의 목록으로 돌아가기</a></p>
-        </div>
-    </div>
-</body>
-</html>
+{% extends "admin_base.html" %}
+{% block title %}찾을 수 없음 - E-Care{% endblock %}
+{% block topbar_title %}문의 목록{% endblock %}
+
+{% block content %}
+<div class="admin-card">
+    <h3>{{ kind }}를 찾을 수 없습니다</h3>
+    <p>ID "{{ target_id }}"에 해당하는 {{ kind }}가 없습니다.</p>
+    <p><a href="{{ url_for('main.inquiries_view') }}">← 문의 목록으로 돌아가기</a></p>
+</div>
+{% endblock %}

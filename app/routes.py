@@ -38,6 +38,12 @@ def _require_login():
     return None
 
 
+@main_bp.context_processor
+def _inject_current_user():
+    """모든 템플릿(admin_base.html 등)에서 로그인 사용자 이름을 바로 쓸 수 있게 한다."""
+    return {"current_user": auth_service.current_username()}
+
+
 @main_bp.route("/login", methods=["GET", "POST"])
 def login_view():
     next_url = request.values.get("next") or url_for("main.dashboard")
@@ -60,7 +66,7 @@ def logout_view():
 
 @main_bp.route("/")
 def index():
-    return render_template("index.html", project_name="E-Care")
+    return render_template("index.html", project_name="E-Care", active_nav="home")
 
 
 @main_bp.route("/dashboard")
@@ -70,8 +76,8 @@ def dashboard():
     data = dashboard_service.get_dashboard_data()
     return render_template(
         "dashboard.html",
+        active_nav="dashboard",
         status_badge_class=workflow_service.STATUS_BADGE_CLASS,
-        current_user=auth_service.current_username(),
         **data,
     )
 
@@ -156,7 +162,7 @@ def structure_test():
 def inquiries_view():
     """문의 목록을 사람이 보기 쉬운 화면으로 보여주고, 상세 화면으로 이동할 수 있게 한다."""
     data = inquiry_service.get_all_inquiries()
-    return render_template("inquiries_view.html", inquiries=data)
+    return render_template("inquiries_view.html", inquiries=data, active_nav="inquiries")
 
 
 def _load_inquiry_context(inquiry_id):
@@ -211,6 +217,7 @@ def _render_detail(inquiry, employee, structured, send_result=None, email_draft_
 
     return render_template(
         "inquiry_detail.html",
+        active_nav="inquiries",
         inquiry=inquiry,
         employee=employee,
         structured=structured,
@@ -237,7 +244,7 @@ def inquiry_detail_view(inquiry_id):
     HR 회신 -> 최종 안내 -> 처리 결과 -> Timeline."""
     inquiry, employee, structured = _load_inquiry_context(inquiry_id)
     if inquiry is None:
-        return render_template("not_found.html", kind="문의", target_id=inquiry_id), 404
+        return render_template("not_found.html", kind="문의", target_id=inquiry_id, active_nav="inquiries"), 404
     return _render_detail(inquiry, employee, structured)
 
 
@@ -246,7 +253,7 @@ def update_steps(inquiry_id):
     """담당자가 업무 절차(Step)의 완료 여부를 체크·저장한다."""
     inquiry, _, structured = _load_inquiry_context(inquiry_id)
     if inquiry is None:
-        return render_template("not_found.html", kind="문의", target_id=inquiry_id), 404
+        return render_template("not_found.html", kind="문의", target_id=inquiry_id, active_nav="inquiries"), 404
 
     completed = [int(v) for v in request.form.getlist("completed_step")]
     workflow_service.save_completed_steps(inquiry_id, completed)
@@ -263,7 +270,7 @@ def send_hr_email(inquiry_id):
     돌아가며 오류 페이지로 넘어가지 않는다."""
     inquiry, employee, structured = _load_inquiry_context(inquiry_id)
     if inquiry is None:
-        return render_template("not_found.html", kind="문의", target_id=inquiry_id), 404
+        return render_template("not_found.html", kind="문의", target_id=inquiry_id, active_nav="inquiries"), 404
 
     subject = request.form.get("email_subject", "")
     body = request.form.get("email_body", "")
@@ -318,7 +325,7 @@ def register_hr_reply(inquiry_id):
     데이터가 아님)"""
     inquiry, _, _ = _load_inquiry_context(inquiry_id)
     if inquiry is None:
-        return render_template("not_found.html", kind="문의", target_id=inquiry_id), 404
+        return render_template("not_found.html", kind="문의", target_id=inquiry_id, active_nav="inquiries"), 404
 
     workflow_service.save_hr_reply(
         inquiry_id,
@@ -337,7 +344,7 @@ def confirm_final_guidance(inquiry_id):
     GHD 담당자가 검토·확정한 것이다."""
     inquiry, _, _ = _load_inquiry_context(inquiry_id)
     if inquiry is None:
-        return render_template("not_found.html", kind="문의", target_id=inquiry_id), 404
+        return render_template("not_found.html", kind="문의", target_id=inquiry_id, active_nav="inquiries"), 404
 
     workflow_service.save_final_guidance(inquiry_id, request.form.get("final_guidance_content", ""))
     return redirect(url_for("main.inquiry_detail_view", inquiry_id=inquiry_id))
@@ -348,7 +355,7 @@ def register_resolution(inquiry_id):
     """문의의 최종 처리 결과를 등록한다. 등록 즉시 상태가 "처리 완료"로 바뀐다."""
     inquiry, _, _ = _load_inquiry_context(inquiry_id)
     if inquiry is None:
-        return render_template("not_found.html", kind="문의", target_id=inquiry_id), 404
+        return render_template("not_found.html", kind="문의", target_id=inquiry_id, active_nav="inquiries"), 404
 
     workflow_service.save_resolution(
         inquiry_id,
