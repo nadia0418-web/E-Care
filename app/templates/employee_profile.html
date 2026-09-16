@@ -35,8 +35,11 @@
 </div>
 
 <div class="admin-card">
-    <h3>입사 초기 정착 체크리스트</h3>
-    <p class="hint-text">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+        <h3 style="border-bottom:none; padding-bottom:0; margin-bottom:0;">초기 정착 체크리스트</h3>
+        <a class="back-link" style="margin-bottom:0;" href="{{ url_for('main.manage_checklist_items_view') }}">⚙️ 항목 관리</a>
+    </div>
+    <p class="hint-text" style="margin-top:10px;">
         입사 초기 정착에 필요한 항목입니다. GHD 담당자가 직접 확인·처리한 항목을 체크하고 저장하세요.
         ({{ settlement_checklist.completed }} / {{ settlement_checklist.total }} 완료)
     </p>

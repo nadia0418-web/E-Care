@@ -228,6 +228,26 @@ def update_employee_checklist_view(employee_id):
     return redirect(url_for("main.employee_profile_view", employee_id=employee_id))
 
 
+@main_bp.route("/settlement-checklist/manage")
+def manage_checklist_items_view():
+    """정착 체크리스트 항목(카탈로그) 관리: 전 직원 공통으로 적용되는 체크리스트
+    항목을 GHD 담당자가 직접 추가/수정할 수 있게 한다."""
+    catalog = settlement_checklist_service.get_checklist_catalog()
+    return render_template("settlement_checklist_manage.html", active_nav="employees", catalog=catalog)
+
+
+@main_bp.route("/settlement-checklist/manage/add", methods=["POST"])
+def add_checklist_item_view():
+    settlement_checklist_service.add_checklist_item(request.form.get("label", ""))
+    return redirect(url_for("main.manage_checklist_items_view"))
+
+
+@main_bp.route("/settlement-checklist/manage/<item_key>/update", methods=["POST"])
+def update_checklist_item_view(item_key):
+    settlement_checklist_service.update_checklist_item(item_key, request.form.get("label", ""))
+    return redirect(url_for("main.manage_checklist_items_view"))
+
+
 @main_bp.route("/employees/<employee_id>/edit", methods=["GET", "POST"])
 def edit_employee_view(employee_id):
     """기존 직원 정보 수정 (특이사항 포함). 신규 등록과 달리 사번은 바뀌지 않는다."""

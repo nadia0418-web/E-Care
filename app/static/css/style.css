@@ -1117,7 +1117,23 @@ a.btn-brand:hover {
     white-space: nowrap;
 }
 
-/* ---- 입사 초기 정착 체크리스트 ---- */
+/* ---- 초기 정착 체크리스트 ---- */
+.checklist-manage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.checklist-manage-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.checklist-manage-row .text-input {
+    flex: 1;
+}
+
 .checklist-list {
     display: flex;
     flex-direction: column;

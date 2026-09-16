@@ -1,0 +1,32 @@
+{% extends "admin_base.html" %}
+{% block title %}체크리스트 항목 관리 - E-CARE{% endblock %}
+{% block topbar_title %}초기 정착 체크리스트 항목 관리{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('main.employees_view') }}">← 직원 데이터로</a>
+
+<div class="disclaimer">
+    ⚠ 여기서 추가·수정하는 항목은 전체 직원에게 공통으로 적용되는 체크리스트 항목입니다.
+    이름을 수정해도 각 직원의 기존 체크 상태는 그대로 유지됩니다.
+</div>
+
+<div class="admin-card">
+    <h3>현재 체크리스트 항목 ({{ catalog|length }}개)</h3>
+    <div class="checklist-manage-list">
+        {% for item in catalog %}
+        <form method="post" action="{{ url_for('main.update_checklist_item_view', item_key=item.item_key) }}" class="checklist-manage-row">
+            <input type="text" name="label" class="text-input" value="{{ item.label }}">
+            <button type="submit" class="btn-primary">저장</button>
+        </form>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="admin-card">
+    <h3>새 항목 추가</h3>
+    <form method="post" action="{{ url_for('main.add_checklist_item_view') }}" class="checklist-manage-row">
+        <input type="text" name="label" class="text-input" placeholder="예: 사원증 발급 확인" required>
+        <button type="submit" class="btn-primary">추가</button>
+    </form>
+</div>
+{% endblock %}
