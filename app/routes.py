@@ -3,6 +3,7 @@ import os
 from flask import Blueprint, jsonify, redirect, render_template, request, url_for
 
 from app.services import (
+    activity_log_service,
     analysis_service,
     auth_service,
     care_profile_service,
@@ -45,8 +46,8 @@ def _require_login():
 
 @main_bp.context_processor
 def _inject_current_user():
-    """모든 템플릿(admin_base.html 등)에서 로그인 사용자 이름을 바로 쓸 수 있게 한다."""
-    return {"current_user": auth_service.current_username()}
+    """모든 템플릿(admin_base.html 등)에서 로그인한 담당자의 표시 이름을 바로 쓸 수 있게 한다."""
+    return {"current_user": auth_service.current_display_name()}
 
 
 @main_bp.route("/login", methods=["GET", "POST"])
@@ -220,11 +221,31 @@ def employee_profile_view(employee_id):
 @main_bp.route("/employees/<employee_id>/checklist", methods=["POST"])
 def update_employee_checklist_view(employee_id):
     """정착 체크리스트 저장: 체크된 항목만 폼으로 전송되므로, 전송된 키 목록을
-    그대로 '체크됨'으로 저장하고 나머지는 미체크로 간주한다."""
-    if employee_service.get_employee_by_id(employee_id) is None:
+    그대로 '체크됨'으로 저장하고 나머지는 미체크로 간주한다. 실제로 상태가 바뀐
+    항목만 활동 로그에 남긴다 (누가 어떤 항목을 체크/해제했는지 추적)."""
+    employee = employee_service.get_employee_by_id(employee_id)
+    if employee is None:
         return render_template("not_found.html", kind="직원", target_id=employee_id, active_nav="employees"), 404
-    checked_keys = request.form.getlist("checklist_item")
+
+    before = settlement_checklist_service.get_checklist(employee)
+    checked_keys = set(request.form.getlist("checklist_item"))
     settlement_checklist_service.save_checklist(employee_id, checked_keys)
+
+    changes = []
+    for item in before["checklist_items"]:
+        now_checked = item["key"] in checked_keys
+        if now_checked != item["checked"]:
+            changes.append(f"{item['label']} ({'체크' if now_checked else '체크 해제'})")
+    if changes:
+        activity_log_service.log_activity(
+            actor=auth_service.current_display_name(),
+            action="체크리스트 항목 변경",
+            target_type="employee",
+            target_id=employee_id,
+            target_label=employee["name"],
+            detail=", ".join(changes),
+        )
+
     return redirect(url_for("main.employee_profile_view", employee_id=employee_id))
 
 
@@ -267,7 +288,16 @@ def edit_employee_view(employee_id):
             "visa_type": request.form.get("visa_type", "").strip(),
             "special_notes": request.form.get("special_notes", ""),
         }
+        notes_changed = patch["special_notes"] != (employee.get("special_notes") or "")
         employee_service.update_employee(employee_id, patch)
+        activity_log_service.log_activity(
+            actor=auth_service.current_display_name(),
+            action="직원 정보 수정",
+            target_type="employee",
+            target_id=employee_id,
+            target_label=patch["name"] or employee["name"],
+            detail="특이사항 변경됨" if notes_changed else None,
+        )
         return redirect(url_for("main.employee_profile_view", employee_id=employee_id))
 
     return render_template(
@@ -276,6 +306,15 @@ def edit_employee_view(employee_id):
         employee=employee,
         employment_period_choices=employee_service.EMPLOYMENT_PERIOD_CHOICES,
     )
+
+
+@main_bp.route("/activity-log")
+def activity_log_view():
+    """활동 로그: 담당자별 계정으로 처리한 주요 작업(직원 정보 수정, 체크리스트
+    변경 등) 내역을 최신순으로 보여준다. 담당자별 데이터 접근 범위는 동일하며,
+    이 화면은 책임소재 추적 용도다."""
+    activities = activity_log_service.get_recent_activity()
+    return render_template("activity_log.html", activities=activities)
 
 
 @main_bp.route("/inquiries")

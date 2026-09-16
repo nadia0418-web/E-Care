@@ -1,0 +1,42 @@
+{% extends "admin_base.html" %}
+{% block title %}활동 로그 - E-CARE{% endblock %}
+{% block topbar_title %}활동 로그{% endblock %}
+
+{% block content %}
+<div class="disclaimer">
+    ⚠ 담당자별 계정으로 처리한 주요 작업 내역입니다. 모든 담당자는 전체 임직원 데이터에
+    동일하게 접근하며, 이 화면은 담당 배분이 아닌 책임소재 추적 용도로만 사용됩니다.
+</div>
+
+<div class="admin-card">
+    <h3>최근 활동 ({{ activities|length }}건)</h3>
+    {% if activities %}
+    <div class="table-scroll">
+        <table class="inquiry-table">
+            <thead>
+                <tr>
+                    <th>일시</th>
+                    <th>담당자</th>
+                    <th>작업</th>
+                    <th>대상 임직원</th>
+                    <th>상세</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in activities %}
+                <tr>
+                    <td>{{ a.created_at }}</td>
+                    <td>{{ a.actor }}</td>
+                    <td>{{ a.action }}</td>
+                    <td>{{ a.target_label or a.target_id or '-' }}</td>
+                    <td>{{ a.detail or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-text">아직 기록된 활동이 없습니다.</p>
+    {% endif %}
+</div>
+{% endblock %}
