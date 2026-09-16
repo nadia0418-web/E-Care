@@ -33,14 +33,10 @@
                 <span class="form-label">입사일</span>
                 <input type="date" name="start_date" class="text-input" value="{{ employee.start_date }}" required>
             </label>
-            <label class="form-field">
-                <span class="form-label">근무기간</span>
-                <select name="employment_period" class="text-input">
-                    {% for choice in employment_period_choices %}
-                    <option value="{{ choice }}" {% if choice == employee.employment_period %}selected{% endif %}>{{ choice }}</option>
-                    {% endfor %}
-                </select>
-            </label>
+            <div class="form-field">
+                <span class="form-label">재직기간 <span class="hint-text" style="margin:0; display:inline;">(입사일 기준 자동 계산)</span></span>
+                <div class="text-input" style="background:#f5f6f8; color:#666; display:flex; align-items:center;">{{ tenure_label }}</div>
+            </div>
             <label class="form-field">
                 <span class="form-label">비자유형</span>
                 <input type="text" name="visa_type" class="text-input" value="{{ employee.visa_type }}" placeholder="예: E-9">

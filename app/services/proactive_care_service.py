@@ -1,4 +1,4 @@
-"""국적/소속기업/비자유형/근무기간 등 임직원 속성을 기준으로 GHD가 선제적으로
+"""국적/소속기업/비자유형/재직기간 등 임직원 속성을 기준으로 GHD가 선제적으로
 확인하면 좋은 항목을 미리 안내한다 (Proactive Care).
 
 ⚠ 여기서 쓰는 기준은 전부 프로젝트 시연용 가상 기준이다. 실제 출입국 규정이나
@@ -10,13 +10,17 @@ from datetime import date
 
 VISA_EXPIRY_WARNING_DAYS = 60
 
-# employees.xlsx의 "근무기간" 값(고정 5종)을 개월 수로 환산 (STEP 2 Demo 데이터 기준)
-EMPLOYMENT_PERIOD_MONTHS = {
-    "1년": 12,
-    "1년 6개월": 18,
-    "2년": 24,
-    "3년": 36,
-    "4년 10개월": 58,
+# 비자유형별 평균 체류/갱신 유효기간(개월) — 비자·체류기간 만료 예상일 추정에 사용
+# (Demo 가정치, 실제 출입국 규정이 아니다). 재직기간(입사일 기준 경과 기간)은 이
+# 추정과 무관하게 화면에는 별도로 자동 계산해 보여준다.
+VISA_TYPE_VALIDITY_MONTHS = {
+    "E-9": 12,
+    "E-7": 24,
+    "F-2": 36,
+    "F-4": 36,
+    "D-8": 24,
+    "D-10": 6,
+    "H-2": 58,
 }
 
 # 국적별 가상 Proactive Care 안내 (Demo 예시 — 실제 규정 아님)
@@ -68,7 +72,7 @@ def _add_months(d, months):
 
 
 def estimate_visa_expiry(employee):
-    """start_date + employment_period로 비자/체류기간 만료 예상일을 추정한다.
+    """start_date + 비자유형별 평균 유효기간으로 비자/체류기간 만료 예상일을 추정한다.
     (실제 출입국 기록이 아닌, Demo 데이터 기반의 단순 추정치)"""
     start = employee.get("start_date")
     if isinstance(start, str):
@@ -76,7 +80,7 @@ def estimate_visa_expiry(employee):
             start = date.fromisoformat(start)
         except ValueError:
             return None
-    months = EMPLOYMENT_PERIOD_MONTHS.get(employee.get("employment_period"))
+    months = VISA_TYPE_VALIDITY_MONTHS.get(employee.get("visa_type"))
     if not start or not months:
         return None
     return _add_months(start, months)

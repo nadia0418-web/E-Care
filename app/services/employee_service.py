@@ -23,16 +23,17 @@ COLUMNS = [
     "special_notes",
 ]
 
-# 신규 등록(수기 입력/파일 업로드) 시 입력받는 컬럼 순서 (employee_id 제외 — 자동 채번)
-UPLOAD_COLUMNS = COLUMNS[1:]
+# 신규 등록(수기 입력/엑셀 업로드) 시 실제로 입력받는 필드와 순서.
+# employment_period는 더 이상 사용자가 입력하지 않는다 — 근무기간(재직기간)은
+# 입사일을 기준으로 화면에서 매번 자동 계산해 보여준다 (compute_tenure_label 참고).
+# COLUMNS에는 기존 엑셀 파일과의 컬럼 위치 호환을 위해 그대로 남겨두되, 값은
+# 항상 빈 문자열로 저장한다.
+UPLOAD_COLUMNS = ["name", "nationality", "client_company", "position", "start_date", "family_accompanied", "visa_type", "special_notes"]
 
 # 정착 체크리스트 상태(JSON 문자열)는 신규 등록 폼/일괄 업로드 대상이 아니라
 # 별도로 관리한다 (COLUMNS 바로 다음 컬럼에 저장).
 SETTLEMENT_COLUMN = "settlement_checklist"
 _ALL_COLUMNS = COLUMNS + [SETTLEMENT_COLUMN]
-
-# 비자/체류기간 만료 추정에 쓰이는 근무기간 고정 5종 (proactive_care_service와 동일)
-EMPLOYMENT_PERIOD_CHOICES = ["1년", "1년 6개월", "2년", "3년", "4년 10개월"]
 
 HEADER_ROW = 3  # 1행: 안내 타이틀, 2행: 공백, 3행: 헤더
 
@@ -72,6 +73,45 @@ def get_all_employees():
         client = supabase_client.get_client()
         _employees_cache = _load_from_supabase(client) if client else _load_from_excel()
     return _employees_cache
+
+
+def compute_tenure_label(start_date, today=None):
+    """입사일(start_date)부터 오늘까지 경과한 재직기간을 "N년 M개월" 형태로 계산한다.
+    완료된 개월 수만 센다(예: 입사 11개월+20일 차라면 "11개월", 반올림하지 않음).
+    입사일이 없거나 미래 날짜면 "-"를 반환한다."""
+    today = today or date.today()
+    if isinstance(start_date, str):
+        try:
+            start_date = date.fromisoformat(start_date)
+        except (TypeError, ValueError):
+            return "-"
+    if not start_date or start_date > today:
+        return "-"
+
+    months = (today.year - start_date.year) * 12 + (today.month - start_date.month)
+    if today.day < start_date.day:
+        months -= 1
+    months = max(months, 0)
+
+    years, rem_months = divmod(months, 12)
+    if years and rem_months:
+        return f"{years}년 {rem_months}개월"
+    if years:
+        return f"{years}년"
+    return f"{rem_months}개월"
+
+
+def get_filter_options(employees):
+    """직원 목록 화면의 검색 필터(국적/소속회사/비자유형) 선택지를 중복 없이
+    정렬해 반환한다."""
+    def _distinct_sorted(values):
+        return sorted({v for v in values if v})
+
+    return {
+        "nationalities": _distinct_sorted(e.get("nationality") for e in employees),
+        "client_companies": _distinct_sorted(e.get("client_company") for e in employees),
+        "visa_types": _distinct_sorted(e.get("visa_type") for e in employees),
+    }
 
 
 def get_employee_by_id(employee_id):
@@ -220,7 +260,8 @@ def parse_upload_workbook(file_stream):
     """직원 데이터 일괄 업로드용 엑셀을 읽는다.
 
     기대 형식: 1행은 헤더(자동 무시), 2행부터 데이터. 컬럼 순서는
-    이름, 국적, 소속회사, 직급, 입사일(YYYY-MM-DD), 근무기간, 가족동반(예/아니오), 비자유형, 특이사항(선택).
+    이름, 국적, 소속회사, 직급, 입사일(YYYY-MM-DD), 가족동반(예/아니오), 비자유형, 특이사항(선택).
+    근무기간(재직기간)은 입사일을 기준으로 자동 계산되므로 업로드 항목에 포함하지 않는다.
     이름이 비어 있는 행은 건너뛴다.
     """
     wb = load_workbook(file_stream, data_only=True)

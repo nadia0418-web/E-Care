@@ -117,17 +117,26 @@ def employees():
     return jsonify({"count": len(data), "employees": data})
 
 
-@main_bp.route("/employees-view")
-def employees_view():
-    """직원 데이터 화면: 목록 조회 + 수기 입력/엑셀 업로드로 신규 직원을 등록한다."""
-    data = employee_service.get_all_employees()
+def _render_employees_view(data, form_result):
+    enriched = [
+        {**emp, "tenure_label": employee_service.compute_tenure_label(emp.get("start_date"))}
+        for emp in data
+    ]
     return render_template(
         "employees_view.html",
-        employees=data,
+        employees=enriched,
         active_nav="employees",
-        employment_period_choices=employee_service.EMPLOYMENT_PERIOD_CHOICES,
-        form_result=None,
+        form_result=form_result,
+        **employee_service.get_filter_options(data),
     )
+
+
+@main_bp.route("/employees-view")
+def employees_view():
+    """직원 데이터 화면: 목록 조회(이름/국적/소속회사/비자유형 필터 검색 포함) +
+    수기 입력/엑셀 업로드로 신규 직원을 등록한다."""
+    data = employee_service.get_all_employees()
+    return _render_employees_view(data, form_result=None)
 
 
 @main_bp.route("/employees-view/add", methods=["POST"])
@@ -139,7 +148,6 @@ def add_employee_view():
         "client_company": request.form.get("client_company", ""),
         "position": request.form.get("position", ""),
         "start_date": request.form.get("start_date", ""),
-        "employment_period": request.form.get("employment_period", ""),
         "family_accompanied": request.form.get("family_accompanied") == "on",
         "visa_type": request.form.get("visa_type", ""),
         "special_notes": request.form.get("special_notes", ""),
@@ -154,13 +162,7 @@ def add_employee_view():
         form_result = {"success": False, "message": "이름이 입력되지 않아 추가하지 못했습니다."}
 
     data = employee_service.get_all_employees()
-    return render_template(
-        "employees_view.html",
-        employees=data,
-        active_nav="employees",
-        employment_period_choices=employee_service.EMPLOYMENT_PERIOD_CHOICES,
-        form_result=form_result,
-    )
+    return _render_employees_view(data, form_result)
 
 
 @main_bp.route("/employees-view/upload", methods=["POST"])
@@ -184,13 +186,7 @@ def upload_employees_view():
             form_result = {"success": False, "message": f"업로드 처리 중 오류가 발생했습니다: {e}"}
 
     data = employee_service.get_all_employees()
-    return render_template(
-        "employees_view.html",
-        employees=data,
-        active_nav="employees",
-        employment_period_choices=employee_service.EMPLOYMENT_PERIOD_CHOICES,
-        form_result=form_result,
-    )
+    return _render_employees_view(data, form_result)
 
 
 @main_bp.route("/employees/<employee_id>")
@@ -283,7 +279,6 @@ def edit_employee_view(employee_id):
             "client_company": request.form.get("client_company", "").strip(),
             "position": request.form.get("position", "").strip(),
             "start_date": request.form.get("start_date", ""),
-            "employment_period": request.form.get("employment_period", ""),
             "family_accompanied": request.form.get("family_accompanied") == "on",
             "visa_type": request.form.get("visa_type", "").strip(),
             "special_notes": request.form.get("special_notes", ""),
@@ -304,7 +299,7 @@ def edit_employee_view(employee_id):
         "employee_edit.html",
         active_nav="employees",
         employee=employee,
-        employment_period_choices=employee_service.EMPLOYMENT_PERIOD_CHOICES,
+        tenure_label=employee_service.compute_tenure_label(employee.get("start_date")),
     )
 
 

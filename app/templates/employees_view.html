@@ -13,9 +13,52 @@
 {% endif %}
 
 <div class="admin-card">
-    <h3>직원 목록 (총 {{ employees|length }}명)</h3>
-    <div class="table-scroll">
-        <table class="inquiry-table">
+    <h3>직원 목록 (총 <span id="empVisibleCount">{{ employees|length }}</span>명)</h3>
+
+    <div class="form-grid" style="margin-bottom: 14px;">
+        <label class="form-field">
+            <span class="form-label">이름/사번 검색</span>
+            <input type="text" id="empFilterKeyword" class="text-input" placeholder="예: Vantha, EMP001">
+        </label>
+        <label class="form-field">
+            <span class="form-label">국적</span>
+            <select id="empFilterNationality" class="text-input">
+                <option value="">전체</option>
+                {% for n in nationalities %}
+                <option value="{{ n }}">{{ n }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="form-field">
+            <span class="form-label">소속회사</span>
+            <select id="empFilterCompany" class="text-input">
+                <option value="">전체</option>
+                {% for c in client_companies %}
+                <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="form-field">
+            <span class="form-label">비자유형</span>
+            <select id="empFilterVisa" class="text-input">
+                <option value="">전체</option>
+                {% for v in visa_types %}
+                <option value="{{ v }}">{{ v }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="form-field">
+            <span class="form-label">가족동반</span>
+            <select id="empFilterFamily" class="text-input">
+                <option value="">전체</option>
+                <option value="예">예</option>
+                <option value="아니오">아니오</option>
+            </select>
+        </label>
+    </div>
+
+    <div class="table-scroll" id="empTableScroll">
+        <table class="inquiry-table" id="empTable">
             <thead>
                 <tr>
                     <th>사번</th>
@@ -24,7 +67,7 @@
                     <th>소속회사</th>
                     <th>직급</th>
                     <th>입사일</th>
-                    <th>근무기간</th>
+                    <th>재직기간</th>
                     <th>가족동반</th>
                     <th>비자유형</th>
                     <th></th>
@@ -32,14 +75,19 @@
             </thead>
             <tbody>
                 {% for emp in employees %}
-                <tr onclick="location.href='{{ url_for('main.employee_profile_view', employee_id=emp.employee_id) }}'" style="cursor:pointer;">
+                <tr onclick="location.href='{{ url_for('main.employee_profile_view', employee_id=emp.employee_id) }}'" style="cursor:pointer;"
+                    data-keyword="{{ (emp.name ~ ' ' ~ emp.employee_id)|lower }}"
+                    data-nationality="{{ emp.nationality }}"
+                    data-company="{{ emp.client_company }}"
+                    data-visa="{{ emp.visa_type }}"
+                    data-family="{{ '예' if emp.family_accompanied else '아니오' }}">
                     <td><a href="{{ url_for('main.employee_profile_view', employee_id=emp.employee_id) }}">{{ emp.employee_id }}</a></td>
                     <td>{{ emp.name }}</td>
                     <td>{{ emp.nationality }}</td>
                     <td>{{ emp.client_company }}</td>
                     <td>{{ emp.position }}</td>
                     <td>{{ emp.start_date }}</td>
-                    <td>{{ emp.employment_period }}</td>
+                    <td>{{ emp.tenure_label }}</td>
                     <td>{{ "예" if emp.family_accompanied else "아니오" }}</td>
                     <td>{{ emp.visa_type }}</td>
                     <td><a href="{{ url_for('main.employee_profile_view', employee_id=emp.employee_id) }}">Care Profile →</a></td>
@@ -48,6 +96,7 @@
             </tbody>
         </table>
     </div>
+    <p class="empty-text" id="empEmptyState" style="display:none;">검색 조건에 맞는 직원이 없습니다.</p>
 </div>
 
 <div class="admin-card-grid">
@@ -72,16 +121,8 @@
                     <input type="text" name="position" class="text-input">
                 </label>
                 <label class="form-field">
-                    <span class="form-label">입사일</span>
+                    <span class="form-label">입사일 <span class="hint-text" style="margin:0; display:inline;">(재직기간은 입사일 기준으로 자동 계산됩니다)</span></span>
                     <input type="date" name="start_date" class="text-input" required>
-                </label>
-                <label class="form-field">
-                    <span class="form-label">근무기간</span>
-                    <select name="employment_period" class="text-input">
-                        {% for choice in employment_period_choices %}
-                        <option value="{{ choice }}">{{ choice }}</option>
-                        {% endfor %}
-                    </select>
                 </label>
                 <label class="form-field">
                     <span class="form-label">비자유형</span>
@@ -104,7 +145,8 @@
         <h3>엑셀 파일로 일괄 업로드</h3>
         <p class="hint-text">
             1행은 헤더(자동 무시)이며, 2행부터 다음 순서로 입력해주세요:<br>
-            <strong>이름 · 국적 · 소속회사 · 직급 · 입사일(YYYY-MM-DD) · 근무기간 · 가족동반(예/아니오) · 비자유형 · 특이사항(선택)</strong>
+            <strong>이름 · 국적 · 소속회사 · 직급 · 입사일(YYYY-MM-DD) · 가족동반(예/아니오) · 비자유형 · 특이사항(선택)</strong><br>
+            재직기간은 입사일을 기준으로 자동 계산되므로 별도로 입력하지 않습니다.
         </p>
         <form method="post" action="{{ url_for('main.upload_employees_view') }}" enctype="multipart/form-data">
             <input type="file" name="employees_file" accept=".xlsx" class="text-input" required>
@@ -112,4 +154,51 @@
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    var keywordInput = document.getElementById("empFilterKeyword");
+    var nationalitySelect = document.getElementById("empFilterNationality");
+    var companySelect = document.getElementById("empFilterCompany");
+    var visaSelect = document.getElementById("empFilterVisa");
+    var familySelect = document.getElementById("empFilterFamily");
+
+    var rows = Array.prototype.slice.call(document.querySelectorAll("#empTable tbody tr"));
+    var visibleCountEl = document.getElementById("empVisibleCount");
+    var emptyStateEl = document.getElementById("empEmptyState");
+    var tableScrollEl = document.getElementById("empTableScroll");
+
+    function applyFilters() {
+        var keyword = keywordInput.value.trim().toLowerCase();
+        var nationality = nationalitySelect.value;
+        var company = companySelect.value;
+        var visa = visaSelect.value;
+        var family = familySelect.value;
+        var visibleCount = 0;
+
+        rows.forEach(function (row) {
+            var matches = (
+                (!keyword || row.dataset.keyword.indexOf(keyword) !== -1) &&
+                (!nationality || row.dataset.nationality === nationality) &&
+                (!company || row.dataset.company === company) &&
+                (!visa || row.dataset.visa === visa) &&
+                (!family || row.dataset.family === family)
+            );
+            row.hidden = !matches;
+            if (matches) visibleCount++;
+        });
+
+        visibleCountEl.textContent = visibleCount;
+        emptyStateEl.hidden = visibleCount !== 0;
+        tableScrollEl.hidden = visibleCount === 0;
+    }
+
+    keywordInput.addEventListener("input", applyFilters);
+    [nationalitySelect, companySelect, visaSelect, familySelect].forEach(function (el) {
+        el.addEventListener("change", applyFilters);
+    });
+})();
+</script>
 {% endblock %}
