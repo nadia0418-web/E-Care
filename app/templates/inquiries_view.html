@@ -13,8 +13,43 @@
 <!-- 전체 문의 -->
 <div class="tab-panel" id="tab-all">
     <div class="admin-card">
-        <h3>전체 문의 (가상 데이터, 총 {{ inquiries|length }}건)</h3>
+        <h3>전체 문의 (가상 데이터, 총 <span data-count-target>{{ inquiries|length }}</span>건)</h3>
         <p class="hint-text">각 문의를 클릭하면 1차 분석 및 구조화 결과를 볼 수 있습니다.</p>
+
+        <div class="form-grid" style="margin-bottom: 14px;">
+            <label class="form-field">
+                <span class="form-label">사번/내용 검색</span>
+                <input type="text" class="text-input" data-filter="keyword" placeholder="예: EMP001, 비자">
+            </label>
+            <label class="form-field">
+                <span class="form-label">카테고리</span>
+                <select class="text-input" data-filter="category">
+                    <option value="">전체</option>
+                    {% for c in all_categories %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="form-field">
+                <span class="form-label">Flag</span>
+                <select class="text-input" data-filter="flag">
+                    <option value="">전체</option>
+                    {% for f in all_flags %}
+                    <option value="{{ f }}">{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="form-field">
+                <span class="form-label">긴급도</span>
+                <select class="text-input" data-filter="urgency">
+                    <option value="">전체</option>
+                    {% for u in all_urgencies %}
+                    <option value="{{ u }}">{{ u }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
+
         <div class="table-scroll">
             <table class="inquiry-table">
                 <thead>
@@ -30,7 +65,9 @@
                 </thead>
                 <tbody>
                     {% for inq in inquiries %}
-                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=inq.inquiry_id) }}'" style="cursor:pointer;">
+                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=inq.inquiry_id) }}'" style="cursor:pointer;"
+                        data-keyword="{{ (inq.inquiry_id ~ ' ' ~ inq.employee_id ~ ' ' ~ inq.inquiry_text)|lower }}"
+                        data-category="{{ inq.category }}" data-flag="{{ inq.flag }}" data-urgency="{{ inq.urgency }}">
                         <td><a href="{{ url_for('main.inquiry_detail_view', inquiry_id=inq.inquiry_id) }}">{{ inq.inquiry_id }}</a></td>
                         <td>{{ inq.inquiry_date }}</td>
                         <td>{{ inq.employee_id }}</td>
@@ -43,6 +80,7 @@
                 </tbody>
             </table>
         </div>
+        <p class="empty-text" data-empty-state hidden>검색 조건에 맞는 문의가 없습니다.</p>
     </div>
 </div>
 
@@ -50,13 +88,46 @@
 <div class="tab-panel" id="tab-priority">
     <div class="admin-card">
         <h3>
-            우선 처리 필요 ({{ priority_total }}건 중 상위 {{ priority_items|length }}건)
+            우선 처리 필요 ({{ priority_total }}건 중 상위 <span data-count-target>{{ priority_items|length }}</span>건)
             <span class="info-tip" tabindex="0">
                 <span class="info-tip-icon">ⓘ</span>
                 <span class="info-tip-text">긴급 문의 → HR 회신 대기 → HR 확인 요청 → 추가 서류 요청 → 신규 문의 순으로 정렬되어 있습니다. AI Priority는 카테고리·긴급도·HR 확인 필요 여부·처리 상태·비자 만료 임박 여부를 조합한 Rule-based 점수입니다.</span>
             </span>
         </h3>
         {% if priority_items %}
+        <div class="form-grid" style="margin-bottom: 14px;">
+            <label class="form-field">
+                <span class="form-label">임직원/문의ID 검색</span>
+                <input type="text" class="text-input" data-filter="keyword" placeholder="예: EMP001, Vantha">
+            </label>
+            <label class="form-field">
+                <span class="form-label">카테고리</span>
+                <select class="text-input" data-filter="category">
+                    <option value="">전체</option>
+                    {% for c in all_categories %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="form-field">
+                <span class="form-label">AI Priority</span>
+                <select class="text-input" data-filter="priority">
+                    <option value="">전체</option>
+                    <option value="HIGH">HIGH</option>
+                    <option value="MEDIUM">MEDIUM</option>
+                    <option value="LOW">LOW</option>
+                </select>
+            </label>
+            <label class="form-field">
+                <span class="form-label">현재 상태</span>
+                <select class="text-input" data-filter="status">
+                    <option value="">전체</option>
+                    {% for s in priority_statuses %}
+                    <option value="{{ s }}">{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
         <div class="table-scroll">
             <table class="inquiry-table">
                 <thead>
@@ -73,7 +144,9 @@
                 </thead>
                 <tbody>
                     {% for item in priority_items %}
-                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;" title="{{ item.ai_priority.reason }}">
+                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;" title="{{ item.ai_priority.reason }}"
+                        data-keyword="{{ (item.inquiry_id ~ ' ' ~ item.employee_name ~ ' ' ~ item.employee_id)|lower }}"
+                        data-category="{{ item.category }}" data-priority="{{ item.ai_priority.level }}" data-status="{{ item.status }}">
                         <td><a href="{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}">{{ item.inquiry_id }}</a></td>
                         <td><a href="{{ url_for('main.employee_profile_view', employee_id=item.employee_id) }}">{{ item.employee_name }}</a></td>
                         <td>{{ item.category }}</td>
@@ -87,6 +160,7 @@
                 </tbody>
             </table>
         </div>
+        <p class="empty-text" data-empty-state hidden>검색 조건에 맞는 문의가 없습니다.</p>
         {% else %}
         <p class="empty-text">지금 우선 처리가 필요한 문의가 없습니다.</p>
         {% endif %}
@@ -96,7 +170,40 @@
 <!-- 최근 문의 -->
 <div class="tab-panel" id="tab-recent">
     <div class="admin-card">
-        <h3>최근 문의</h3>
+        <h3>최근 문의 (<span data-count-target>{{ recent_items|length }}</span>건)</h3>
+        <div class="form-grid" style="margin-bottom: 14px;">
+            <label class="form-field">
+                <span class="form-label">임직원 검색</span>
+                <input type="text" class="text-input" data-filter="keyword" placeholder="예: EMP001, Vantha">
+            </label>
+            <label class="form-field">
+                <span class="form-label">카테고리</span>
+                <select class="text-input" data-filter="category">
+                    <option value="">전체</option>
+                    {% for c in all_categories %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="form-field">
+                <span class="form-label">Flag</span>
+                <select class="text-input" data-filter="flag">
+                    <option value="">전체</option>
+                    {% for f in all_flags %}
+                    <option value="{{ f }}">{{ f }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="form-field">
+                <span class="form-label">긴급도</span>
+                <select class="text-input" data-filter="urgency">
+                    <option value="">전체</option>
+                    {% for u in all_urgencies %}
+                    <option value="{{ u }}">{{ u }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
         <div class="table-scroll">
             <table class="inquiry-table">
                 <thead>
@@ -113,7 +220,9 @@
                 </thead>
                 <tbody>
                     {% for item in recent_items %}
-                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;">
+                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;"
+                        data-keyword="{{ (item.employee_name ~ ' ' ~ item.employee_id)|lower }}"
+                        data-category="{{ item.category }}" data-flag="{{ item.flag_type }}" data-urgency="{{ item.urgency }}">
                         <td>{{ item.inquiry_date }}</td>
                         <td><a href="{{ url_for('main.employee_profile_view', employee_id=item.employee_id) }}">{{ item.employee_name }}</a></td>
                         <td>{{ item.category }}</td>
@@ -127,14 +236,39 @@
                 </tbody>
             </table>
         </div>
+        <p class="empty-text" data-empty-state hidden>검색 조건에 맞는 문의가 없습니다.</p>
     </div>
 </div>
 <!-- 처리 완료 -->
 <div class="tab-panel" id="tab-completed">
     <div class="admin-card">
-        <h3>처리 완료 ({{ completed_total }}건 중 최근 {{ completed_items|length }}건)</h3>
+        <h3>처리 완료 ({{ completed_total }}건 중 최근 <span data-count-target>{{ completed_items|length }}</span>건)</h3>
         <p class="hint-text">처리 완료로 등록된 순서(최근 순)로 정렬되어 있습니다.</p>
         {% if completed_items %}
+        <div class="form-grid" style="margin-bottom: 14px;">
+            <label class="form-field">
+                <span class="form-label">임직원/문의ID 검색</span>
+                <input type="text" class="text-input" data-filter="keyword" placeholder="예: EMP001, Vantha">
+            </label>
+            <label class="form-field">
+                <span class="form-label">카테고리</span>
+                <select class="text-input" data-filter="category">
+                    <option value="">전체</option>
+                    {% for c in all_categories %}
+                    <option value="{{ c }}">{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="form-field">
+                <span class="form-label">처리 결과</span>
+                <select class="text-input" data-filter="outcome">
+                    <option value="">전체</option>
+                    {% for o in completed_outcomes %}
+                    <option value="{{ o }}">{{ o }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+        </div>
         <div class="table-scroll">
             <table class="inquiry-table">
                 <thead>
@@ -149,7 +283,9 @@
                 </thead>
                 <tbody>
                     {% for item in completed_items %}
-                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;">
+                    <tr onclick="location.href='{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}'" style="cursor:pointer;"
+                        data-keyword="{{ (item.inquiry_id ~ ' ' ~ item.employee_name ~ ' ' ~ item.employee_id)|lower }}"
+                        data-category="{{ item.category }}" data-outcome="{{ item.resolution.outcome if item.resolution else '' }}">
                         <td><a href="{{ url_for('main.inquiry_detail_view', inquiry_id=item.inquiry_id) }}">{{ item.inquiry_id }}</a></td>
                         <td><a href="{{ url_for('main.employee_profile_view', employee_id=item.employee_id) }}">{{ item.employee_name }}</a></td>
                         <td>{{ item.category }}</td>
@@ -161,6 +297,7 @@
                 </tbody>
             </table>
         </div>
+        <p class="empty-text" data-empty-state hidden>검색 조건에 맞는 문의가 없습니다.</p>
         {% else %}
         <p class="empty-text">아직 처리 완료된 문의가 없습니다.</p>
         {% endif %}
@@ -200,6 +337,42 @@
     });
 
     activate(initialTab);
+})();
+
+// 탭별 검색/필터 — data-filter 값을 가진 입력/셀렉트가 바뀔 때마다
+// 같은 탭 패널 안의 tbody tr을 data-* 속성과 비교해 즉시 보여주고 숨긴다.
+(function () {
+    function setupPanelFilter(panel) {
+        var controls = Array.prototype.slice.call(panel.querySelectorAll("[data-filter]"));
+        if (!controls.length) return;
+        var rows = Array.prototype.slice.call(panel.querySelectorAll("tbody tr"));
+        var countEl = panel.querySelector("[data-count-target]");
+        var emptyEl = panel.querySelector("[data-empty-state]");
+        var tableScrollEl = panel.querySelector(".table-scroll");
+
+        function apply() {
+            var visible = 0;
+            rows.forEach(function (row) {
+                var match = controls.every(function (el) {
+                    var value = (el.value || "").trim().toLowerCase();
+                    if (!value) return true;
+                    var cell = (row.dataset[el.dataset.filter] || "").toLowerCase();
+                    return el.tagName === "SELECT" ? cell === value : cell.indexOf(value) !== -1;
+                });
+                row.hidden = !match;
+                if (match) visible++;
+            });
+            if (countEl) countEl.textContent = visible;
+            if (emptyEl) emptyEl.hidden = visible !== 0;
+            if (tableScrollEl) tableScrollEl.hidden = visible === 0;
+        }
+
+        controls.forEach(function (el) {
+            el.addEventListener(el.tagName === "SELECT" ? "change" : "input", apply);
+        });
+    }
+
+    document.querySelectorAll(".tab-panel").forEach(setupPanelFilter);
 })();
 </script>
 {% endblock %}

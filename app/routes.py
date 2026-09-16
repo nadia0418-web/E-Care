@@ -380,16 +380,24 @@ def structure_test():
     return jsonify(result)
 
 
+def _distinct_sorted(values):
+    return sorted({v for v in values if v})
+
+
 @main_bp.route("/inquiries-view")
 def inquiries_view():
     """문의 목록 화면: 전체 문의 / 우선 처리 필요 / 최근 문의 / 처리 완료를
     탭으로 묶어서 보여준다. ?tab= 쿼리로 홈 화면의 배너·KPI 카드에서 바로 원하는
-    탭으로 진입할 수 있다. 선제 케어(Proactive Care)는 별도 메뉴(/preventive-care)로
-    분리되어 있다."""
+    탭으로 진입할 수 있다. 각 탭마다 그 탭의 컬럼에 맞는 검색/필터를 제공한다.
+    선제 케어(Proactive Care)는 별도 메뉴(/preventive-care)로 분리되어 있다."""
     data = inquiry_service.get_all_inquiries()
     dashboard_data = dashboard_service.get_dashboard_data(
         priority_limit=200, recent_limit=50, completed_limit=200
     )
+    priority_items = dashboard_data["priority_items"]
+    recent_items = dashboard_data["recent_items"]
+    completed_items = dashboard_data["completed_items"]
+
     active_tab = request.args.get("tab", "all")
     if active_tab not in ("all", "priority", "recent", "completed"):
         active_tab = "all"
@@ -399,11 +407,16 @@ def inquiries_view():
         active_nav="inquiries",
         active_tab=active_tab,
         status_badge_class=workflow_service.STATUS_BADGE_CLASS,
-        priority_items=dashboard_data["priority_items"],
+        priority_items=priority_items,
         priority_total=dashboard_data["priority_total"],
-        recent_items=dashboard_data["recent_items"],
-        completed_items=dashboard_data["completed_items"],
+        recent_items=recent_items,
+        completed_items=completed_items,
         completed_total=dashboard_data["completed_total"],
+        all_categories=_distinct_sorted(i["category"] for i in data),
+        all_flags=_distinct_sorted(i["flag"] for i in data),
+        all_urgencies=_distinct_sorted(i["urgency"] for i in data),
+        priority_statuses=list(workflow_service.STATUS_BADGE_CLASS.keys()),
+        completed_outcomes=workflow_service.RESOLUTION_OPTIONS,
     )
 
 
