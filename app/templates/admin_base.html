@@ -14,6 +14,7 @@
             <div class="admin-logo">E-CARE<span class="admin-logo-dot"></span></div>
             <div class="admin-nav-section">메뉴</div>
             <a class="admin-nav-item {% if active_nav == 'home' %}active{% endif %}" href="{{ url_for('main.index') }}"><span class="admin-nav-icon">🏠</span>홈</a>
+            <a class="admin-nav-item {% if active_nav == 'preventive' %}active{% endif %}" href="{{ url_for('main.preventive_care_view') }}"><span class="admin-nav-icon">🛡️</span>선제 케어</a>
             <a class="admin-nav-item {% if active_nav == 'inquiries' %}active{% endif %}" href="{{ url_for('main.inquiries_view') }}"><span class="admin-nav-icon">📨</span>문의 목록</a>
             <a class="admin-nav-item {% if active_nav == 'employees' %}active{% endif %}" href="{{ url_for('main.employees_view') }}"><span class="admin-nav-icon">👤</span>직원 데이터</a>
             <a class="admin-nav-item {% if active_nav == 'rules' %}active{% endif %}" href="{{ url_for('main.ghd_rules_view') }}"><span class="admin-nav-icon">📋</span>관련 내규</a>

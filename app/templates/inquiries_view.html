@@ -5,7 +5,6 @@
 {% block content %}
 <div class="tab-nav">
     <button type="button" class="tab-btn" data-tab="all">전체 문의</button>
-    <button type="button" class="tab-btn" data-tab="proactive">선제 확인 필요</button>
     <button type="button" class="tab-btn" data-tab="priority">우선 처리 필요</button>
     <button type="button" class="tab-btn" data-tab="recent">최근 문의</button>
     <button type="button" class="tab-btn" data-tab="completed">처리 완료</button>
@@ -44,43 +43,6 @@
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
-
-<!-- 선제 확인 필요 (Proactive Care) -->
-<div class="tab-panel" id="tab-proactive">
-    <div class="admin-card">
-        <h3>선제 확인 필요 (Proactive Care)</h3>
-        <p class="hint-text">국적·비자유형·근무기간·소속 고객사를 바탕으로 문의가 들어오기 전에 GHD가 미리 챙기면 좋은 항목입니다.
-            가상 Demo 기준이며 실제 출입국 규정이나 고객사 정책이 아닙니다 — 최종 확인은 GHD 담당자가 합니다.</p>
-        {% if proactive_items %}
-        <div class="table-scroll">
-            <table class="inquiry-table">
-                <thead>
-                    <tr>
-                        <th>임직원</th>
-                        <th>국적</th>
-                        <th>소속</th>
-                        <th>긴급도</th>
-                        <th>선제 확인 항목</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in proactive_items %}
-                    <tr onclick="location.href='{{ url_for('main.employee_profile_view', employee_id=item.employee_id) }}'" style="cursor:pointer;">
-                        <td><a href="{{ url_for('main.employee_profile_view', employee_id=item.employee_id) }}">{{ item.employee_name }} ({{ item.employee_id }})</a></td>
-                        <td>{{ item.nationality }}</td>
-                        <td>{{ item.client_company }}</td>
-                        <td><span class="badge badge-{{ item.severity }}">{{ item.severity }}</span></td>
-                        <td>{{ item.message }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p class="empty-text">지금 선제적으로 확인할 항목이 없습니다.</p>
-        {% endif %}
     </div>
 </div>
 
@@ -205,7 +167,7 @@
 {% block scripts %}
 <script>
 (function () {
-    var validTabs = ["all", "proactive", "priority", "recent", "completed"];
+    var validTabs = ["all", "priority", "recent", "completed"];
     var params = new URLSearchParams(window.location.search);
     var initialTab = params.get("tab");
     if (validTabs.indexOf(initialTab) === -1) {

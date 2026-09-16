@@ -10,6 +10,7 @@ from app.services import (
     employee_service,
     inquiry_service,
     mail_service,
+    proactive_care_service,
     rule_service,
     structuring_service,
     workflow_service,
@@ -90,6 +91,21 @@ def index():
 def dashboard_redirect():
     """이전 /dashboard 링크(공유된 데모 URL 등) 호환용 리다이렉트. 홈과 통합되었다."""
     return redirect(url_for("main.index"))
+
+
+@main_bp.route("/preventive-care")
+def preventive_care_view():
+    """선제 케어(Preventive Care) 전체 목록: 국적·비자유형·근무기간·소속 고객사·
+    가족 동반 여부를 바탕으로, 문의가 들어오기 전에 GHD가 미리 챙기면 좋은 항목
+    전체를 모아서 보여준다. E-CARE의 핵심 기능이라 문의 목록과 분리된 별도
+    메뉴로 둔다."""
+    employees = employee_service.get_all_employees()
+    proactive_items = proactive_care_service.get_all_proactive_items(employees)
+    return render_template(
+        "preventive_care_view.html",
+        active_nav="preventive",
+        proactive_items=proactive_items,
+    )
 
 
 @main_bp.route("/employees")
@@ -263,15 +279,16 @@ def structure_test():
 
 @main_bp.route("/inquiries-view")
 def inquiries_view():
-    """문의 목록 화면: 전체 문의 / 선제 확인 필요 / 우선 처리 필요 / 최근 문의를
+    """문의 목록 화면: 전체 문의 / 우선 처리 필요 / 최근 문의 / 처리 완료를
     탭으로 묶어서 보여준다. ?tab= 쿼리로 홈 화면의 배너·KPI 카드에서 바로 원하는
-    탭으로 진입할 수 있다."""
+    탭으로 진입할 수 있다. 선제 케어(Proactive Care)는 별도 메뉴(/preventive-care)로
+    분리되어 있다."""
     data = inquiry_service.get_all_inquiries()
     dashboard_data = dashboard_service.get_dashboard_data(
         priority_limit=200, recent_limit=50, completed_limit=200
     )
     active_tab = request.args.get("tab", "all")
-    if active_tab not in ("all", "proactive", "priority", "recent", "completed"):
+    if active_tab not in ("all", "priority", "recent", "completed"):
         active_tab = "all"
     return render_template(
         "inquiries_view.html",
@@ -279,7 +296,6 @@ def inquiries_view():
         active_nav="inquiries",
         active_tab=active_tab,
         status_badge_class=workflow_service.STATUS_BADGE_CLASS,
-        proactive_items=dashboard_data["proactive_items"],
         priority_items=dashboard_data["priority_items"],
         priority_total=dashboard_data["priority_total"],
         recent_items=dashboard_data["recent_items"],

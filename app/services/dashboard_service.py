@@ -245,9 +245,9 @@ def _get_ai_care_insight(priority_items, proactive_items):
     if visa_high:
         return {
             "message": f"비자/체류기간 만료가 임박한 임직원이 {len(visa_high)}명 있습니다.",
-            "recommendation": "선제 확인 필요 목록에서 연장 절차를 안내하세요.",
-            "action_label": "선제 확인 필요 보기",
-            "action_url": "/inquiries-view?tab=proactive",
+            "recommendation": "선제 케어 목록에서 연장 절차를 안내하세요.",
+            "action_label": "선제 케어 보기",
+            "action_url": "/preventive-care",
         }
 
     return None
@@ -255,7 +255,7 @@ def _get_ai_care_insight(priority_items, proactive_items):
 
 def _get_urgent_banners(priority_items, proactive_items, recent_items):
     """홈 화면 상단에 노출할 '정말 긴급한 사안만' 요약한 짧은 배너 목록.
-    각 배너는 해당 탭(문의 목록의 선제 확인/우선 처리/최근 문의 탭)으로 바로 연결된다."""
+    각 배너는 해당 화면(선제 케어 / 문의 목록의 우선 처리·최근 문의 탭)으로 바로 연결된다."""
     banners = []
 
     high_priority_count = sum(1 for s in priority_items if s["urgency"] == "HIGH")
@@ -274,7 +274,7 @@ def _get_urgent_banners(priority_items, proactive_items, recent_items):
             {
                 "level": "warning",
                 "message": f"비자/체류기간 만료가 임박한 임직원이 {visa_high_count}명 있습니다.",
-                "url": "/inquiries-view?tab=proactive",
+                "url": "/preventive-care",
             }
         )
 
@@ -290,7 +290,7 @@ def _get_urgent_banners(priority_items, proactive_items, recent_items):
     return banners
 
 
-def get_dashboard_data(priority_limit=15, recent_limit=15, completed_limit=15):
+def get_dashboard_data(priority_limit=15, recent_limit=15, completed_limit=15, proactive_preview_limit=6):
     inquiries = inquiry_service.get_all_inquiries()
     # 문의 건수만큼 진행 상태를 반복 조회(N+1)하면 Supabase 호출이 폭증하므로,
     # 배치로 한 번에 가져와 각 문의에 매칭한다.
@@ -336,6 +336,8 @@ def get_dashboard_data(priority_limit=15, recent_limit=15, completed_limit=15):
         "completed_items": completed_items,
         "completed_total": completed_total,
         "proactive_items": proactive_items,
+        "proactive_preview": proactive_items[:proactive_preview_limit],
+        "proactive_total": len(proactive_items),
         "care_activity": _get_care_activity(inquiries),
         "care_by_category": _get_care_by_category(inquiries),
         "upcoming_care": _get_upcoming_care(priority_items),
