@@ -27,6 +27,7 @@
                     <th>근무기간</th>
                     <th>가족동반</th>
                     <th>비자유형</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -41,6 +42,7 @@
                     <td>{{ emp.employment_period }}</td>
                     <td>{{ "예" if emp.family_accompanied else "아니오" }}</td>
                     <td>{{ emp.visa_type }}</td>
+                    <td><a href="{{ url_for('main.employee_profile_view', employee_id=emp.employee_id) }}">Care Profile →</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -90,6 +92,10 @@
                     <span class="form-label">가족동반</span>
                 </label>
             </div>
+            <label class="form-field" style="margin-bottom:16px;">
+                <span class="form-label">특이사항 <span class="hint-text" style="margin:0; display:inline;">(식이·문화적 편의사항, 고객사에 노출되지 않는 GHD 내부 메모 등 — 선택 입력)</span></span>
+                <textarea name="special_notes" class="text-area" rows="3" placeholder="예: 할랄 식단 준수 필요, GHD 내부 메모 등"></textarea>
+            </label>
             <button type="submit" class="btn-primary">직원 추가</button>
         </form>
     </div>
@@ -98,7 +104,7 @@
         <h3>엑셀 파일로 일괄 업로드</h3>
         <p class="hint-text">
             1행은 헤더(자동 무시)이며, 2행부터 다음 순서로 입력해주세요:<br>
-            <strong>이름 · 국적 · 소속회사 · 직급 · 입사일(YYYY-MM-DD) · 근무기간 · 가족동반(예/아니오) · 비자유형</strong>
+            <strong>이름 · 국적 · 소속회사 · 직급 · 입사일(YYYY-MM-DD) · 근무기간 · 가족동반(예/아니오) · 비자유형 · 특이사항(선택)</strong>
         </p>
         <form method="post" action="{{ url_for('main.upload_employees_view') }}" enctype="multipart/form-data">
             <input type="file" name="employees_file" accept=".xlsx" class="text-input" required>

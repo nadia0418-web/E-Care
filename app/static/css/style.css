@@ -1117,6 +1117,37 @@ a.btn-brand:hover {
     white-space: nowrap;
 }
 
+/* ---- 입사 초기 정착 체크리스트 ---- */
+.checklist-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 4px;
+    font-size: 14px;
+    border-bottom: 1px dashed #f0f0f0;
+    cursor: pointer;
+}
+
+.checklist-item:last-child {
+    border-bottom: none;
+}
+
+.checklist-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    flex: 0 0 auto;
+}
+
+.checklist-item.is-done .checklist-label {
+    text-decoration: line-through;
+}
+
 /* ---- Employee Care Profile ---- */
 .profile-header {
     display: flex;

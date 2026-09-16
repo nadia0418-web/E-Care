@@ -14,7 +14,15 @@
                 · 비자유형 {{ employee.visa_type }} · 입사일 {{ employee.start_date }}
             </div>
         </div>
+        <a class="btn-brand" href="{{ url_for('main.edit_employee_view', employee_id=employee.employee_id) }}">✏️ 정보 수정</a>
     </div>
+
+    {% if employee.special_notes %}
+    <div class="mini-card mini-card-primary" style="margin-top:16px;">
+        <div class="mini-card-header">📌 특이사항 (GHD 내부 메모 — 고객사 비공개)</div>
+        <div style="white-space:pre-line; font-size:14px;">{{ employee.special_notes }}</div>
+    </div>
+    {% endif %}
 
     <h3 style="margin-top:22px;">Care Progress</h3>
     <div class="progress-bar-track">
@@ -24,6 +32,28 @@
         <span>{{ progress.completed }} / {{ progress.total }} Care Items Completed</span>
         <span>{{ progress.percent }}%</span>
     </div>
+</div>
+
+<div class="admin-card">
+    <h3>입사 초기 정착 체크리스트</h3>
+    <p class="hint-text">
+        입사 초기 정착에 필요한 항목입니다. GHD 담당자가 직접 확인·처리한 항목을 체크하고 저장하세요.
+        ({{ settlement_checklist.completed }} / {{ settlement_checklist.total }} 완료)
+    </p>
+    <div class="progress-bar-track" style="margin-bottom:14px;">
+        <div class="progress-bar-fill" style="width: {{ settlement_checklist.percent }}%;"></div>
+    </div>
+    <form method="post" action="{{ url_for('main.update_employee_checklist_view', employee_id=employee.employee_id) }}">
+        <div class="checklist-list">
+            {% for item in settlement_checklist.checklist_items %}
+            <label class="checklist-item {{ 'is-done' if item.checked }}">
+                <input type="checkbox" name="checklist_item" value="{{ item.key }}" {% if item.checked %}checked{% endif %}>
+                <span class="checklist-label">{{ item.label }}</span>
+            </label>
+            {% endfor %}
+        </div>
+        <button type="submit" class="btn-primary" style="margin-top:14px;">체크리스트 저장</button>
+    </form>
 </div>
 
 <div class="admin-card-grid" style="margin-bottom: 22px;">

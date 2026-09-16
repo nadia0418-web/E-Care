@@ -1,0 +1,60 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ employee.name }} 정보 수정 - E-CARE{% endblock %}
+{% block topbar_title %}직원 정보 수정{% endblock %}
+
+{% block content %}
+<a class="back-link" href="{{ url_for('main.employee_profile_view', employee_id=employee.employee_id) }}">← {{ employee.name }} Care Profile로</a>
+
+<div class="disclaimer">
+    ⚠ 아래에서 수정하는 직원 데이터는 프로젝트 시연용 가상 데이터입니다. 실제 임직원의 개인정보를 입력하지 마세요.
+</div>
+
+<div class="admin-card">
+    <h3>{{ employee.name }} ({{ employee.employee_id }}) 정보 수정</h3>
+    <form method="post" action="{{ url_for('main.edit_employee_view', employee_id=employee.employee_id) }}">
+        <div class="form-grid">
+            <label class="form-field">
+                <span class="form-label">이름</span>
+                <input type="text" name="name" class="text-input" value="{{ employee.name }}" required>
+            </label>
+            <label class="form-field">
+                <span class="form-label">국적</span>
+                <input type="text" name="nationality" class="text-input" value="{{ employee.nationality }}" required>
+            </label>
+            <label class="form-field">
+                <span class="form-label">소속회사</span>
+                <input type="text" name="client_company" class="text-input" value="{{ employee.client_company }}" required>
+            </label>
+            <label class="form-field">
+                <span class="form-label">직급</span>
+                <input type="text" name="position" class="text-input" value="{{ employee.position }}">
+            </label>
+            <label class="form-field">
+                <span class="form-label">입사일</span>
+                <input type="date" name="start_date" class="text-input" value="{{ employee.start_date }}" required>
+            </label>
+            <label class="form-field">
+                <span class="form-label">근무기간</span>
+                <select name="employment_period" class="text-input">
+                    {% for choice in employment_period_choices %}
+                    <option value="{{ choice }}" {% if choice == employee.employment_period %}selected{% endif %}>{{ choice }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="form-field">
+                <span class="form-label">비자유형</span>
+                <input type="text" name="visa_type" class="text-input" value="{{ employee.visa_type }}" placeholder="예: E-9">
+            </label>
+            <label class="form-field form-field-checkbox">
+                <input type="checkbox" name="family_accompanied" {% if employee.family_accompanied %}checked{% endif %}>
+                <span class="form-label">가족동반</span>
+            </label>
+        </div>
+        <label class="form-field" style="margin-bottom:16px;">
+            <span class="form-label">특이사항 <span class="hint-text" style="margin:0; display:inline;">(식이·문화적 편의사항, 고객사에 노출되지 않는 GHD 내부 메모 등)</span></span>
+            <textarea name="special_notes" class="text-area" rows="4" placeholder="예: 할랄 식단 준수 필요, GHD 내부 메모 등">{{ employee.special_notes or "" }}</textarea>
+        </label>
+        <button type="submit" class="btn-primary">저장</button>
+    </form>
+</div>
+{% endblock %}

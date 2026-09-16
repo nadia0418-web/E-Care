@@ -12,6 +12,7 @@ from app.services import (
     mail_service,
     proactive_care_service,
     rule_service,
+    settlement_checklist_service,
     structuring_service,
     workflow_service,
 )
@@ -140,6 +141,7 @@ def add_employee_view():
         "employment_period": request.form.get("employment_period", ""),
         "family_accompanied": request.form.get("family_accompanied") == "on",
         "visa_type": request.form.get("visa_type", ""),
+        "special_notes": request.form.get("special_notes", ""),
     }
     added = employee_service.add_employees([record])
     if added:
@@ -202,11 +204,58 @@ def employee_detail(employee_id):
 def employee_profile_view(employee_id):
     """Employee Care Profile: 이 직원에게 지금까지 어떤 Care가 진행되었고
     현재 무엇이 남아 있는지를 Care Progress + Open Care Items + HR Flag +
-    Care Timeline으로 한 화면에서 보여준다."""
+    Care Timeline + 정착 체크리스트로 한 화면에서 보여준다."""
     profile = care_profile_service.get_employee_care_profile(employee_id)
     if profile is None:
         return render_template("not_found.html", kind="직원", target_id=employee_id, active_nav="employees"), 404
-    return render_template("employee_profile.html", active_nav="employees", **profile)
+    settlement_checklist = settlement_checklist_service.get_checklist(profile["employee"])
+    return render_template(
+        "employee_profile.html",
+        active_nav="employees",
+        settlement_checklist=settlement_checklist,
+        **profile,
+    )
+
+
+@main_bp.route("/employees/<employee_id>/checklist", methods=["POST"])
+def update_employee_checklist_view(employee_id):
+    """정착 체크리스트 저장: 체크된 항목만 폼으로 전송되므로, 전송된 키 목록을
+    그대로 '체크됨'으로 저장하고 나머지는 미체크로 간주한다."""
+    if employee_service.get_employee_by_id(employee_id) is None:
+        return render_template("not_found.html", kind="직원", target_id=employee_id, active_nav="employees"), 404
+    checked_keys = request.form.getlist("checklist_item")
+    settlement_checklist_service.save_checklist(employee_id, checked_keys)
+    return redirect(url_for("main.employee_profile_view", employee_id=employee_id))
+
+
+@main_bp.route("/employees/<employee_id>/edit", methods=["GET", "POST"])
+def edit_employee_view(employee_id):
+    """기존 직원 정보 수정 (특이사항 포함). 신규 등록과 달리 사번은 바뀌지 않는다."""
+    employee = employee_service.get_employee_by_id(employee_id)
+    if employee is None:
+        return render_template("not_found.html", kind="직원", target_id=employee_id, active_nav="employees"), 404
+
+    if request.method == "POST":
+        patch = {
+            "name": request.form.get("name", "").strip(),
+            "nationality": request.form.get("nationality", "").strip(),
+            "client_company": request.form.get("client_company", "").strip(),
+            "position": request.form.get("position", "").strip(),
+            "start_date": request.form.get("start_date", ""),
+            "employment_period": request.form.get("employment_period", ""),
+            "family_accompanied": request.form.get("family_accompanied") == "on",
+            "visa_type": request.form.get("visa_type", "").strip(),
+            "special_notes": request.form.get("special_notes", ""),
+        }
+        employee_service.update_employee(employee_id, patch)
+        return redirect(url_for("main.employee_profile_view", employee_id=employee_id))
+
+    return render_template(
+        "employee_edit.html",
+        active_nav="employees",
+        employee=employee,
+        employment_period_choices=employee_service.EMPLOYMENT_PERIOD_CHOICES,
+    )
 
 
 @main_bp.route("/inquiries")

@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import date
 from pathlib import Path
@@ -19,10 +20,16 @@ COLUMNS = [
     "employment_period",
     "family_accompanied",
     "visa_type",
+    "special_notes",
 ]
 
 # 신규 등록(수기 입력/파일 업로드) 시 입력받는 컬럼 순서 (employee_id 제외 — 자동 채번)
 UPLOAD_COLUMNS = COLUMNS[1:]
+
+# 정착 체크리스트 상태(JSON 문자열)는 신규 등록 폼/일괄 업로드 대상이 아니라
+# 별도로 관리한다 (COLUMNS 바로 다음 컬럼에 저장).
+SETTLEMENT_COLUMN = "settlement_checklist"
+_ALL_COLUMNS = COLUMNS + [SETTLEMENT_COLUMN]
 
 # 비자/체류기간 만료 추정에 쓰이는 근무기간 고정 5종 (proactive_care_service와 동일)
 EMPLOYMENT_PERIOD_CHOICES = ["1년", "1년 6개월", "2년", "3년", "4년 10개월"]
@@ -42,8 +49,11 @@ def _load_from_excel():
             continue
         record = dict(zip(COLUMNS, row))
         record["family_accompanied"] = record["family_accompanied"] == "예"
+        record["special_notes"] = record.get("special_notes") or ""
         if hasattr(record["start_date"], "strftime"):
             record["start_date"] = record["start_date"].strftime("%Y-%m-%d")
+        settlement_raw = row[len(COLUMNS)] if len(row) > len(COLUMNS) else None
+        record[SETTLEMENT_COLUMN] = settlement_raw or "{}"
         employees.append(record)
     return employees
 
@@ -92,6 +102,7 @@ def _normalize_new_record(record):
         "employment_period": (record.get("employment_period") or "").strip(),
         "family_accompanied": bool(record.get("family_accompanied")),
         "visa_type": (record.get("visa_type") or "").strip(),
+        "special_notes": (record.get("special_notes") or "").strip(),
     }
 
 
@@ -117,6 +128,8 @@ def _append_to_excel(records):
             record["employment_period"],
             "예" if record["family_accompanied"] else "아니오",
             record["visa_type"],
+            record.get("special_notes", ""),
+            record.get(SETTLEMENT_COLUMN, "{}"),
         ]
         for col, value in enumerate(values, start=1):
             ws.cell(row=row, column=col, value=value)
@@ -131,6 +144,47 @@ def _insert_to_supabase(client, records):
             start_date = start_date.isoformat()
         payload.append({**record, "start_date": start_date})
     client.table("employees").upsert(payload).execute()
+
+
+def _update_in_excel(employee_id, patch):
+    wb = load_workbook(DATA_PATH)
+    ws = wb["직원명단"]
+    col_index = {name: i + 1 for i, name in enumerate(_ALL_COLUMNS)}
+    for row in ws.iter_rows(min_row=HEADER_ROW + 1):
+        if row[0].value == employee_id:
+            for field, value in patch.items():
+                col = col_index.get(field)
+                if not col:
+                    continue
+                if field == "family_accompanied":
+                    value = "예" if value else "아니오"
+                elif field == "start_date" and isinstance(value, str) and value:
+                    try:
+                        value = date.fromisoformat(value)
+                    except ValueError:
+                        pass
+                row[col - 1].value = value
+            break
+    wb.save(DATA_PATH)
+
+
+def _update_in_supabase(client, employee_id, patch):
+    client.table("employees").update(patch).eq("employee_id", employee_id).execute()
+
+
+def update_employee(employee_id, patch):
+    """기존 직원 레코드의 일부 필드를 수정한다 (직원 정보 수정, 정착 체크리스트 저장 등
+    공용으로 사용). Supabase가 설정되어 있으면 그쪽에, 아니면 로컬 엑셀에 반영하고
+    캐시를 비운다."""
+    global _employees_cache
+
+    client = supabase_client.get_client()
+    if client:
+        _update_in_supabase(client, employee_id, patch)
+    else:
+        _update_in_excel(employee_id, patch)
+
+    _employees_cache = None
 
 
 def add_employees(new_records):
@@ -150,6 +204,7 @@ def add_employees(new_records):
     width = max(3, len(str(start_num + len(normalized) - 1)))
     for i, record in enumerate(normalized):
         record["employee_id"] = f"EMP{start_num + i:0{width}d}"
+        record[SETTLEMENT_COLUMN] = "{}"  # 신규 입사자는 정착 체크리스트 미체크 상태로 시작
 
     client = supabase_client.get_client()
     if client:
@@ -165,7 +220,7 @@ def parse_upload_workbook(file_stream):
     """직원 데이터 일괄 업로드용 엑셀을 읽는다.
 
     기대 형식: 1행은 헤더(자동 무시), 2행부터 데이터. 컬럼 순서는
-    이름, 국적, 소속회사, 직급, 입사일(YYYY-MM-DD), 근무기간, 가족동반(예/아니오), 비자유형.
+    이름, 국적, 소속회사, 직급, 입사일(YYYY-MM-DD), 근무기간, 가족동반(예/아니오), 비자유형, 특이사항(선택).
     이름이 비어 있는 행은 건너뛴다.
     """
     wb = load_workbook(file_stream, data_only=True)
