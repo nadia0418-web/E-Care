@@ -1,5 +1,5 @@
-"""국적/소속기업/비자유형/재직기간 등 임직원 속성을 기준으로 GHD가 선제적으로
-확인하면 좋은 항목을 미리 안내한다 (Proactive Care).
+"""국적/소속기업/비자유형/재직기간/정착 체크리스트 진행 상황 등 임직원 속성을
+기준으로 GHD가 선제적으로 확인하면 좋은 항목을 미리 안내한다 (Proactive Care).
 
 ⚠ 여기서 쓰는 기준은 전부 프로젝트 시연용 가상 기준이다. 실제 출입국 규정이나
 고객사 정책이 아니며, AI가 법적/행정적 최종 판단을 내리는 것도 아니다. GHD 담당자가
@@ -8,7 +8,15 @@
 
 from datetime import date
 
+from app.services import settlement_checklist_service
+
 VISA_EXPIRY_WARNING_DAYS = 60
+
+# 입사 후 이 일수가 지나도 정착 체크리스트가 끝나지 않았으면 선제 케어 대상으로 본다
+# (그 전에는 아직 정착 준비 기간으로 보고 재촉하지 않는다).
+SETTLEMENT_CHECKLIST_WARNING_DAYS = 30
+# 위 경과일을 넘긴 상태에서, 완료율이 이 값 미만이면 HIGH, 그 이상 100% 미만이면 MEDIUM
+SETTLEMENT_CHECKLIST_HIGH_COMPLETION = 0.5
 
 # 비자유형별 평균 체류/갱신 유효기간(개월) — 비자·체류기간 만료 예상일 추정에 사용
 # (Demo 가정치, 실제 출입국 규정이 아니다). 재직기간(입사일 기준 경과 기간)은 이
@@ -86,10 +94,48 @@ def estimate_visa_expiry(employee):
     return _add_months(start, months)
 
 
+def _settlement_checklist_item(employee, today):
+    """입사 후 SETTLEMENT_CHECKLIST_WARNING_DAYS일이 지났는데도 정착 체크리스트가
+    끝나지 않은 경우 선제 케어 항목을 만든다. 완료율이 낮을수록 HIGH로 올린다."""
+    start = employee.get("start_date")
+    if isinstance(start, str):
+        try:
+            start = date.fromisoformat(start)
+        except ValueError:
+            return None
+    if not start:
+        return None
+
+    elapsed_days = (today - start).days
+    if elapsed_days < SETTLEMENT_CHECKLIST_WARNING_DAYS:
+        return None
+
+    checklist = settlement_checklist_service.get_checklist(employee)
+    if checklist["total"] == 0 or checklist["completed"] == checklist["total"]:
+        return None
+
+    percent = checklist["completed"] / checklist["total"]
+    severity = "HIGH" if percent < SETTLEMENT_CHECKLIST_HIGH_COMPLETION else "MEDIUM"
+    remaining = [item["label"] for item in checklist["checklist_items"] if not item["checked"]]
+
+    return {
+        "type": "settlement_checklist_overdue",
+        "message": (
+            f"입사 {elapsed_days}일 경과, 초기 정착 체크리스트 {checklist['completed']}/{checklist['total']}건 완료 "
+            f"— 미완료: {', '.join(remaining)}"
+        ),
+        "severity": severity,
+    }
+
+
 def get_proactive_items(employee, today=None):
     """직원 1명에 대한 선제 확인 항목 리스트를 반환한다. 없으면 빈 리스트."""
     today = today or date.today()
     items = []
+
+    settlement_item = _settlement_checklist_item(employee, today)
+    if settlement_item:
+        items.append(settlement_item)
 
     expiry = estimate_visa_expiry(employee)
     if expiry:
