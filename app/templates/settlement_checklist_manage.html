@@ -5,7 +5,8 @@
 {% block content %}
 <a class="back-link" href="{{ url_for('main.employees_view') }}">← 직원 데이터로</a>
 
-<div class="disclaimer">
+<div class="disclaimer" data-disclaimer-id="checklist_manage">
+    <button type="button" class="disclaimer-close" aria-label="닫기">×</button>
     ⚠ 여기서 추가·수정하는 항목은 전체 직원에게 공통으로 적용되는 체크리스트 항목입니다.
     이름을 수정해도 각 직원의 기존 체크 상태는 그대로 유지됩니다.
 </div>

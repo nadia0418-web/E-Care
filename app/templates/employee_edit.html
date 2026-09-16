@@ -5,7 +5,8 @@
 {% block content %}
 <a class="back-link" href="{{ url_for('main.employee_profile_view', employee_id=employee.employee_id) }}">← {{ employee.name }} Care Profile로</a>
 
-<div class="disclaimer">
+<div class="disclaimer" data-disclaimer-id="employee_edit">
+    <button type="button" class="disclaimer-close" aria-label="닫기">×</button>
     ⚠ 아래에서 수정하는 직원 데이터는 프로젝트 시연용 가상 데이터입니다. 실제 임직원의 개인정보를 입력하지 마세요.
 </div>
 

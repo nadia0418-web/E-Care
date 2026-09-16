@@ -75,13 +75,94 @@ a.back-link:hover {
 }
 
 .disclaimer {
+    position: relative;
     background: #fff4e5;
     border: 1px solid #f0c36d;
     color: #7a5b00;
-    padding: 10px 14px;
+    padding: 10px 34px 10px 14px;
     border-radius: 8px;
     font-size: 13px;
     margin: 12px 0 20px;
+}
+
+.disclaimer-close {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #7a5b00;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+.disclaimer-close:hover {
+    background: rgba(122, 91, 0, 0.1);
+}
+
+/* ---- 정보 툴팁 (긴 설명문을 아이콘 hover로 대체) ---- */
+.info-tip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    margin-left: 6px;
+    cursor: help;
+    vertical-align: middle;
+}
+
+.info-tip-icon {
+    color: #999;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.info-tip-text {
+    position: absolute;
+    left: 0;
+    top: 100%;
+    margin-top: 8px;
+    width: 300px;
+    max-width: 80vw;
+    background: var(--brand-charcoal);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.6;
+    padding: 10px 12px;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 20;
+}
+
+.info-tip:hover .info-tip-text,
+.info-tip:focus .info-tip-text,
+.info-tip:focus-within .info-tip-text {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+/* ---- 긴 메시지 한 줄로 줄이고 전체 내용은 hover(title)로 ---- */
+.truncate-cell {
+    display: inline-block;
+    max-width: 420px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: bottom;
+}
+
+@media (max-width: 760px) {
+    .truncate-cell {
+        max-width: 220px;
+    }
 }
 
 /* ---- 문의 목록 테이블 ---- */

@@ -40,6 +40,26 @@
             </div>
         </div>
     </div>
+    <script>
+    (function () {
+        document.querySelectorAll(".disclaimer[data-disclaimer-id]").forEach(function (box) {
+            var key = "disclaimer-dismissed-" + box.dataset.disclaimerId;
+            var dismissed = false;
+            try { dismissed = localStorage.getItem(key) === "1"; } catch (e) {}
+            if (dismissed) {
+                box.hidden = true;
+                return;
+            }
+            var closeBtn = box.querySelector(".disclaimer-close");
+            if (closeBtn) {
+                closeBtn.addEventListener("click", function () {
+                    box.hidden = true;
+                    try { localStorage.setItem(key, "1"); } catch (e) {}
+                });
+            }
+        });
+    })();
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -78,7 +78,7 @@
                 <td>{{ item.nationality }}</td>
                 <td>{{ item.client_company }}</td>
                 <td><span class="badge badge-{{ item.severity }}">{{ item.severity }}</span></td>
-                <td>{{ item.message }}</td>
+                <td><span class="truncate-cell" title="{{ item.message }}">{{ item.message }}</span></td>
             </tr>
             {% endfor %}
         </tbody>

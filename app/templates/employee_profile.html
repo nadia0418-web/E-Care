@@ -115,7 +115,7 @@
             {% for item in proactive_items %}
             <tr>
                 <td><span class="badge badge-{{ item.severity }}">{{ item.severity }}</span></td>
-                <td>{{ item.message }}</td>
+                <td><span class="truncate-cell" title="{{ item.message }}" style="max-width:520px;">{{ item.message }}</span></td>
             </tr>
             {% endfor %}
         </tbody>
