@@ -42,6 +42,23 @@ CLIENT_POLICY_NOTES = {
     "한빛전자(주)": "정전기 방지(ESD) 교육 이수 여부 사전 확인 필요",
 }
 
+# 비자 유형별 가상 Proactive Care 안내 (Demo 예시 — 실제 출입국 규정 아님)
+VISA_TYPE_NOTES = {
+    "E-9": "고용허가제(E-9) 특성상 사업장 변경 시 별도 허가 절차가 필요 — 이직·전근 관련 문의 시 사전 안내 권장",
+    "E-7": "특정활동(E-7) 비자는 등록된 직무 범위와 실제 업무가 일치하는지 주기적 확인 권장",
+    "F-2": "거주(F-2) 비자는 상대적으로 자유로운 체류자격이나, 갱신 주기 및 요건 변경 여부 확인 권장",
+    "F-4": "재외동포(F-4) 비자는 일부 단순노무 업종 종사에 제한이 있어 배치 직무 확인 필요",
+    "D-8": "기업투자(D-8) 비자는 투자 유지 요건 충족 여부를 주기적으로 확인 필요",
+    "D-10": "구직(D-10) 비자는 체류기간이 짧고 정식 취업 시 비자 변경 절차가 필요 — 미리 안내 권장",
+    "H-2": "방문취업(H-2) 비자는 사업장 변경 가능 횟수에 제한이 있어 이직 문의 시 사전 확인 필요",
+}
+
+# 가족 동반 시 가상 Proactive Care 안내 (Demo 예시 — 개별 자녀·배우자 정보까지는 다루지 않음)
+FAMILY_ACCOMPANIED_NOTE = (
+    "가족 동반 임직원 — 자녀 학교 배정, 배우자 비자 상태, 가족 건강보험 가입 여부를 "
+    "선제적으로 확인하면 좋음"
+)
+
 
 def _add_months(d, months):
     year = d.year + (d.month - 1 + months) // 12
@@ -92,6 +109,13 @@ def get_proactive_items(employee, today=None):
     client_note = CLIENT_POLICY_NOTES.get(employee.get("client_company"))
     if client_note:
         items.append({"type": "client_policy_note", "message": client_note, "severity": "LOW"})
+
+    visa_note = VISA_TYPE_NOTES.get(employee.get("visa_type"))
+    if visa_note:
+        items.append({"type": "visa_type_note", "message": visa_note, "severity": "LOW"})
+
+    if employee.get("family_accompanied"):
+        items.append({"type": "family_note", "message": FAMILY_ACCOMPANIED_NOTE, "severity": "LOW"})
 
     return items
 
