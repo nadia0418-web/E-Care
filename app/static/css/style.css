@@ -47,7 +47,6 @@ p {
 }
 
 .admin-content a:hover {
-    color: var(--brand-orange);
     text-decoration: underline;
 }
 
@@ -61,7 +60,6 @@ p {
 }
 
 .back-link:hover {
-    color: var(--brand-orange);
     text-decoration: underline;
 }
 
@@ -192,10 +190,13 @@ p {
     border-radius: 6px;
     font-size: 14px;
     cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .btn-primary:hover {
     background: #235a92;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(43, 108, 176, 0.3);
 }
 
 .btn-primary:disabled {
@@ -789,9 +790,10 @@ p {
     background: linear-gradient(90deg, var(--brand-orange), #ffb27a);
 }
 
-.admin-kpi-card:hover {
+a.admin-kpi-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(18, 20, 24, 0.1);
+    text-decoration: none;
 }
 
 .admin-kpi-card.is-urgent::before {
@@ -935,10 +937,13 @@ p {
     color: var(--brand-charcoal);
     text-decoration: none;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.alert-banner:hover {
+a.alert-banner:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transform: translateY(-1px);
+    text-decoration: none;
 }
 
 .alert-banner.level-critical { border-left-color: #d64545; }
@@ -1042,10 +1047,15 @@ a.admin-kpi-card {
     font-weight: 700;
     text-decoration: none;
     cursor: pointer;
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.btn-brand:hover {
+a.btn-brand:hover {
     background: var(--brand-orange-dark);
+    color: #fff;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(224, 95, 0, 0.35);
 }
 
 /* ---- Upcoming Care 목록 ---- */
