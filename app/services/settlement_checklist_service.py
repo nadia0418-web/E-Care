@@ -8,7 +8,6 @@ settlement_checklist_items 테이블에, 없으면 로컬 JSON 파일에 저장)
 """
 
 import json
-import re
 from pathlib import Path
 
 from app.services import employee_service, supabase_client
@@ -69,15 +68,13 @@ def get_checklist_catalog():
     return _catalog_cache
 
 
-def _make_item_key(label, existing_keys):
-    base = re.sub(r"[^a-z0-9]+", "_", label.strip().lower()).strip("_") or "item"
-    base = base[:40]
-    key = base
-    n = 2
-    while key in existing_keys:
-        key = f"{base}_{n}"
+def _make_item_key(existing_keys):
+    """새 항목의 내부 식별자(item_key)를 만든다. 화면에는 label만 노출되므로
+    항목 이름(한글이 대부분)을 굳이 슬러그로 변환하지 않고 순번 기반으로 채번한다."""
+    n = 1
+    while f"item_{n}" in existing_keys:
         n += 1
-    return key
+    return f"item_{n}"
 
 
 def add_checklist_item(label):
@@ -88,7 +85,7 @@ def add_checklist_item(label):
         return
 
     catalog = get_checklist_catalog()
-    key = _make_item_key(label, {item["item_key"] for item in catalog})
+    key = _make_item_key({item["item_key"] for item in catalog})
     next_order = max((item.get("sort_order", 0) for item in catalog), default=-1) + 1
     new_item = {"item_key": key, "label": label, "sort_order": next_order}
 
